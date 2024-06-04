@@ -80,7 +80,7 @@ public class SellerPayStackPaymentServiceImpl implements SellerPayStackService {
 
             SellerPaymentStack sellerPaymentStack = SellerPaymentStack.builder()
                     .amount(amountToBePaid)
-                    .status(PaymentStatus.REFUNDED.name())
+                    .status(PaymentStatus.PENDING.name())
                     .product(product.get())
                     .seller(product.get().getProductOwner())
                     .reference((String) mapResponse.get("reference"))

@@ -4,18 +4,20 @@ package com.vendavaultecommerceproject.cotroller.category;
 import com.vendavaultecommerceproject.dto.category.CategoryDto;
 import com.vendavaultecommerceproject.entities.category.CategoryEntity;
 import com.vendavaultecommerceproject.service.main.category.CategoryService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("/api/vi/admin")
-@RequiredArgsConstructor
+@RestController
 public class CategoryController {
 
     private final CategoryService categoryService;
+
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
+    }
 
 
     @PostMapping("/category/create")

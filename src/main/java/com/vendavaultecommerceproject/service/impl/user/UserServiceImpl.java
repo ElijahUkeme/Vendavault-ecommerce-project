@@ -17,10 +17,10 @@ import com.vendavaultecommerceproject.service.main.email.EmailService;
 import com.vendavaultecommerceproject.service.main.token.UserAuthenticationTokenService;
 import com.vendavaultecommerceproject.service.main.user.UserService;
 import com.vendavaultecommerceproject.util.Utility;
+import com.vendavaultecommerceproject.util.enums.AccountStatus;
 import com.vendavaultecommerceproject.utils.UserModelUtil;
 import com.vendavaultecommerceproject.utils.UserVerificationUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.xml.bind.DatatypeConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -113,6 +113,7 @@ public class UserServiceImpl implements UserService {
                     .password(encryptedCustomerPassword)
                     .isVerified(false)
                     .identificationUrl(downloadUrl)
+                    .accountStatus(AccountStatus.Active.name())
                     .phoneNumber(userDto.getPhoneNumber())
                     .identificationUrl(downloadUrl)
                     .build();
@@ -220,6 +221,11 @@ public class UserServiceImpl implements UserService {
             if (!(user.isVerified())){
                 return new ServerResponse(baseUrl+request.getRequestURI(),"NOT OK",new ApiResponse(409,"Login Information",
                         "This user has not been verified, please go to your email and click on the verified link to verify your account",
+                        null));
+            }
+            if (user.getAccountStatus().equalsIgnoreCase(AccountStatus.Suspended.name())){
+                return new ServerResponse(baseUrl+request.getRequestURI(),"NOT OK",new ApiResponse(409,"Login Information",
+                        "This user account has been suspended, please contact the admin for more clarification",
                         null));
             }
         }

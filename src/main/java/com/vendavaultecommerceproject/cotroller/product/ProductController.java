@@ -51,39 +51,39 @@ public class ProductController {
                 .body(new ByteArrayResource(imageEntity.getData()));
     }
 
-    @PostMapping("/admin/access/product")
+    @PostMapping("products/admin/access")
     public ProductServerResponse approveOrRejectProduct(@RequestBody ApprovedOrRejectProductDto approvedOrRejectProductDto, HttpServletRequest request){
         return  productService.approveOrRejectProductByAdmin(approvedOrRejectProductDto,request);
     }
 
-    @PostMapping("/product/update")
+    @PostMapping("/products/update")
     public ProductServerResponse updateProduct(@RequestBody UpdateProductDto updateProductDto,HttpServletRequest request){
         return productService.updateProduct(updateProductDto,request);
     }
 
-    @PostMapping("/approved/products/for/seller")
+    @PostMapping("/products/approved/for/seller")
     public ProductServerListResponse getAllProductForTheSeller(@RequestBody RetrieveUserDto retrieveUserDto,HttpServletRequest request){
         return productService.getAllApprovedProductForTheSeller(retrieveUserDto,request);
     }
-    @PostMapping("/pending/products/for/seller")
+    @PostMapping("/products/pending/for/seller")
     public ProductServerListResponse getAllPendingProductForTheSeller(@RequestBody RetrieveUserDto retrieveUserDto,HttpServletRequest request){
         return productService.getAllPendingProductForTheSeller(retrieveUserDto,request);
     }
-    @PostMapping("/uploaded/products/for/seller")
+    @PostMapping("/products/uploaded/for/seller")
     public ProductServerListResponse getAllUploadedProductForTheSeller(@RequestBody RetrieveUserDto retrieveUserDto,HttpServletRequest request){
         return productService.getAllUploadedProductForTheSeller(retrieveUserDto,request);
     }
-    @PostMapping("/all/productsInStock/for/seller")
+    @PostMapping("/products/productsInStock/for/seller")
     public ProductServerListResponse getAllProductInStockForTheSeller(@RequestBody RetrieveUserDto retrieveUserDto,HttpServletRequest request){
         return productService.getAllProductInTheStockForTheSeller(retrieveUserDto,request);
     }
 
-    @GetMapping("/available/products")
+    @GetMapping("/products/available")
     public ResponseEntity<ProductPageResponse> getProductByPagination(@RequestParam(defaultValue = AppConstants.PAGE_NUMBER,required = false)Integer pageNumber,
                                                                       @RequestParam(defaultValue = AppConstants.PAGE_SIZE,required = false)Integer pageSize){
         return ResponseEntity.ok(productService.getAllProductWithPagination(pageNumber,pageSize));
     }
-    @GetMapping("/available/products/by/sorting")
+    @GetMapping("/products/available/with/sorting")
     public ResponseEntity<ProductPageResponse> getProductByPaginationAndSorting(@RequestParam(defaultValue = AppConstants.PAGE_NUMBER,required = false)Integer pageNumber,
                                                                       @RequestParam(defaultValue = AppConstants.PAGE_SIZE,required = false)Integer pageSize,
                                                                                 @RequestParam(defaultValue = AppConstants.SORT_BY,required = false)String sortBy,

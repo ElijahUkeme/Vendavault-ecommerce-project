@@ -9,6 +9,7 @@ import com.vendavaultecommerceproject.entities.category.CategoryEntity;
 import com.vendavaultecommerceproject.entities.product.entity.ProductEntity;
 import com.vendavaultecommerceproject.entities.product.image.ProductImageEntity;
 import com.vendavaultecommerceproject.entities.seller.SellerEntity;
+import com.vendavaultecommerceproject.exception.exeception.DataNotFoundException;
 import com.vendavaultecommerceproject.model.product.ProductModel;
 import com.vendavaultecommerceproject.payment.enums.PaymentStatus;
 import com.vendavaultecommerceproject.payment.response.common.CustomPaymentResponse;
@@ -66,9 +67,7 @@ public class ProductServiceImpl implements ProductService {
         if (uploadProductDto.getPrice().intValue() <=0){
             return ResponseEntity.badRequest().body(new CustomPaymentResponse(false, "Invalid product price", null));
         }
-        if (Objects.isNull(categoryName(uploadProductDto.getCategory()))){
-            return ResponseEntity.badRequest().body(new CustomPaymentResponse(false, "Product Category not found", null));
-        }
+        categoryName(uploadProductDto.getCategory());
 
         ProductImageEntity imageEntity = productImageService.saveProductImage(file);
         if (Objects.isNull(imageEntity)) {
@@ -90,17 +89,9 @@ public class ProductServiceImpl implements ProductService {
                 .updatedDate(null)
                 .build();
         productRepository.save(product);
-        new Thread(()->{
-            try {
-                Thread.sleep(5*1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }).start();
         System.out.println("The product Id is "+product.getId());
         return sellerPayStackService.initializePayment(product.getId());
     }
-
     @Override
     public ProductServerResponse approveOrRejectProductByAdmin(ApprovedOrRejectProductDto approvedOrRejectProductDto, HttpServletRequest request) {
         ProductEntity product = productRepository.findByProductId(approvedOrRejectProductDto.getProductId());
@@ -165,11 +156,13 @@ public class ProductServiceImpl implements ProductService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<ProductEntity> productPage = productRepository.findAll(pageable);
 
-        //This will be implemented later
-        //I just want to declare the empty list first
+        //Only display product whose status is approved
+        //And payment status is paid
         List<ProductModel> productModels = new ArrayList<>();
         for (ProductEntity product:productPage){
-            productModels.add(ProductModelUtil.getReturnedProductModel(product));
+            if (product.getStatus().equalsIgnoreCase("Approved") && product.getPaymentStatus().equalsIgnoreCase("Paid")){
+                productModels.add(ProductModelUtil.getReturnedProductModel(product));
+            }
         }
         return new ProductPageResponse(
                 productModels, pageNumber, pageSize, productPage.getTotalPages(), (int) productPage.getTotalElements(), productPage.isLast()
@@ -184,11 +177,13 @@ public class ProductServiceImpl implements ProductService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize,sort);
         Page<ProductEntity> productPage = productRepository.findAll(pageable);
 
-        //This will be implemented later
-        //I just want to declare the empty list first
+        //Only display product whose status is approved
+        //And payment status is paid
         List<ProductModel> productModels = new ArrayList<>();
         for (ProductEntity product:productPage){
-            productModels.add(ProductModelUtil.getReturnedProductModel(product));
+            if (product.getStatus().equalsIgnoreCase("Approved") && product.getPaymentStatus().equalsIgnoreCase("Paid")){
+                productModels.add(ProductModelUtil.getReturnedProductModel(product));
+            }
         }
         return new ProductPageResponse(
                 productModels, pageNumber, pageSize, productPage.getTotalPages(), (int) productPage.getTotalElements(), productPage.isLast()
@@ -206,8 +201,8 @@ public class ProductServiceImpl implements ProductService {
         List<ProductModel> retrievedProduct = allProductsForTheSeller(seller);
         List<ProductModel> approvedProduct = new ArrayList<>();
         for (ProductModel productModel: retrievedProduct){
-            if (productModel.getStatus().equalsIgnoreCase("Approved")){
-                //only add product whose status is approved to the list
+            if (productModel.getStatus().equalsIgnoreCase("Approved")&& productModel.getPaymentStatus().equalsIgnoreCase("Paid")){
+                //only add product whose status is approved and payment status is paid to the list
                 approvedProduct.add(productModel);
             }
         }
@@ -264,8 +259,8 @@ public class ProductServiceImpl implements ProductService {
         List<ProductModel> retrievedProduct = allProductsForTheSeller(seller);
         List<ProductModel> productInStock = new ArrayList<>();
         for (ProductModel productModel: retrievedProduct){
-            if (productModel.getStatus().equalsIgnoreCase("Approved")){
-                //only add product whose status is approved
+            if (productModel.getStatus().equalsIgnoreCase("Approved")&& productModel.getPaymentStatus().equalsIgnoreCase("Paid")){
+                //only add product whose status is approved and payment status is paid
                     productInStock.add(productModel);
             }
         }
@@ -283,8 +278,8 @@ public class ProductServiceImpl implements ProductService {
         return productModelList;
 
     }
-    String categoryName(String categoryName){
-        String catName = null;
+    void categoryName(String categoryName) throws DataNotFoundException {
+        String catName = "";
         List<CategoryEntity> categoryEntityList = categoryService.getAllCategory();
         boolean found = false;
         for (CategoryEntity category: categoryEntityList){
@@ -293,8 +288,9 @@ public class ProductServiceImpl implements ProductService {
                 found = true;
                 break;
             }
-            return null;
         }
-        return catName;
+        if (!found){
+            throw new DataNotFoundException("There is no category with this name");
+        }
     }
 }

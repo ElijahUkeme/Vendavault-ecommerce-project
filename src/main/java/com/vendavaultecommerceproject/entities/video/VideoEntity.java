@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,6 +24,9 @@ public class VideoEntity {
     private Long id;
     private String title;
     private String videoUrl;
+    private String status;
+    private String paymentStatus;
+    private Date approvedDate;
 
     @ManyToOne(targetEntity = SellerEntity.class)
     @JoinColumn(nullable = false,name = "seller_id")

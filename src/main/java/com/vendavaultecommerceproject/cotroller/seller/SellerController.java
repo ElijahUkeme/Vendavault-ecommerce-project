@@ -1,16 +1,12 @@
 package com.vendavaultecommerceproject.cotroller.seller;
 
 
-import com.vendavaultecommerceproject.dto.seller.AdminApproveSellerDto;
 import com.vendavaultecommerceproject.dto.seller.SellerDto;
 import com.vendavaultecommerceproject.dto.seller.SellerUpdateDto;
 import com.vendavaultecommerceproject.dto.user.SignInDto;
-import com.vendavaultecommerceproject.dto.user.UpdateUserInfoDto;
-import com.vendavaultecommerceproject.dto.user.UserDto;
 import com.vendavaultecommerceproject.entities.attachment.AttachmentEntity;
 import com.vendavaultecommerceproject.exception.exeception.DataNotFoundException;
 import com.vendavaultecommerceproject.response.seller.SellerServerResponse;
-import com.vendavaultecommerceproject.response.user.ServerResponse;
 import com.vendavaultecommerceproject.service.main.attachment.AttachmentService;
 import com.vendavaultecommerceproject.service.main.seller.SellerService;
 import jakarta.servlet.http.HttpServletRequest;

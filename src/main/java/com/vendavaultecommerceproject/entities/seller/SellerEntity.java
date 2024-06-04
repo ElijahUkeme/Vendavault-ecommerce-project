@@ -25,6 +25,7 @@ public class SellerEntity {
     private String businessName;
     private boolean isVerified;
     private String phoneNumber;
+    private String accountStatus;
     private String businessDescription;
     private String identificationUrl;
     @OneToOne(mappedBy = "seller")

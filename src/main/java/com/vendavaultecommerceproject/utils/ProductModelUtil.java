@@ -17,6 +17,7 @@ public class ProductModelUtil {
                 .category(product.getCategory())
                 .description(product.getDescription())
                 .status(product.getStatus())
+                .paymentStatus(product.getPaymentStatus())
                 .updatedDate(product.getUpdatedDate())
                 .uploadedDate(product.getUploadedDate())
                 .price(product.getPrice())

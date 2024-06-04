@@ -2,7 +2,6 @@ package com.vendavaultecommerceproject.service.impl.seller;
 
 
 import com.vendavaultecommerceproject.dto.password.ResetPasswordDto;
-import com.vendavaultecommerceproject.dto.seller.AdminApproveSellerDto;
 import com.vendavaultecommerceproject.dto.seller.SellerDto;
 import com.vendavaultecommerceproject.dto.seller.SellerUpdateDto;
 import com.vendavaultecommerceproject.dto.user.SignInDto;
@@ -14,13 +13,12 @@ import com.vendavaultecommerceproject.model.email.EmailDetails;
 import com.vendavaultecommerceproject.repository.seller.SellerRepository;
 import com.vendavaultecommerceproject.response.seller.SellerResponse;
 import com.vendavaultecommerceproject.response.seller.SellerServerResponse;
-import com.vendavaultecommerceproject.response.user.ApiResponse;
-import com.vendavaultecommerceproject.response.user.ServerResponse;
 import com.vendavaultecommerceproject.service.main.attachment.AttachmentService;
 import com.vendavaultecommerceproject.service.main.email.EmailService;
 import com.vendavaultecommerceproject.service.main.seller.SellerService;
 import com.vendavaultecommerceproject.service.main.token.SellerAuthenticationTokenService;
 import com.vendavaultecommerceproject.util.Utility;
+import com.vendavaultecommerceproject.util.enums.AccountStatus;
 import com.vendavaultecommerceproject.utils.SellerModelUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -56,59 +54,59 @@ public class SellerServiceImpl implements SellerService {
     @Override
     public SellerServerResponse registerSeller(MultipartFile file, SellerDto sellerDto, HttpServletRequest request) throws Exception {
 
-        if (Objects.isNull(sellerDto.getEmail())|| sellerDto.getEmail().trim().isEmpty()){
-            return new SellerServerResponse(baseUrl+request.getRequestURI(),"NOT OK",
-                    new SellerResponse(406,"Seller Authentication","Email field cannot be empty",null));
+        if (Objects.isNull(sellerDto.getEmail()) || sellerDto.getEmail().trim().isEmpty()) {
+            return new SellerServerResponse(baseUrl + request.getRequestURI(), "NOT OK",
+                    new SellerResponse(406, "Seller Authentication", "Email field cannot be empty", null));
         }
-        if (Objects.isNull(sellerDto.getUsername())|| sellerDto.getUsername().trim().isEmpty()){
-            return new SellerServerResponse(baseUrl+request.getRequestURI(),"NOT OK",
-                    new SellerResponse(406,"Seller Authentication","Username field cannot be empty",null));
+        if (Objects.isNull(sellerDto.getUsername()) || sellerDto.getUsername().trim().isEmpty()) {
+            return new SellerServerResponse(baseUrl + request.getRequestURI(), "NOT OK",
+                    new SellerResponse(406, "Seller Authentication", "Username field cannot be empty", null));
         }
-        if (Objects.isNull(sellerDto.getName())|| sellerDto.getName().isEmpty()){
-            return new SellerServerResponse(baseUrl+request.getRequestURI(),"NOT OK",
-                    new SellerResponse(406,"Seller Authentication","Name field cannot be empty",null));
+        if (Objects.isNull(sellerDto.getName()) || sellerDto.getName().isEmpty()) {
+            return new SellerServerResponse(baseUrl + request.getRequestURI(), "NOT OK",
+                    new SellerResponse(406, "Seller Authentication", "Name field cannot be empty", null));
         }
-        if (Objects.isNull(sellerDto.getBusinessDescription())|| sellerDto.getBusinessDescription().isEmpty()){
-            return new SellerServerResponse(baseUrl+request.getRequestURI(),"NOT OK",
-                    new SellerResponse(406,"Seller Authentication","Please give a brief description about your business",null));
+        if (Objects.isNull(sellerDto.getBusinessDescription()) || sellerDto.getBusinessDescription().isEmpty()) {
+            return new SellerServerResponse(baseUrl + request.getRequestURI(), "NOT OK",
+                    new SellerResponse(406, "Seller Authentication", "Please give a brief description about your business", null));
         }
-        if (Objects.isNull(sellerDto.getPassword())|| sellerDto.getPassword().trim().isEmpty()){
-            return new SellerServerResponse(baseUrl+request.getRequestURI(),"NOT OK",
-                    new SellerResponse(406,"Seller Authentication","Password field cannot be empty",null));
+        if (Objects.isNull(sellerDto.getPassword()) || sellerDto.getPassword().trim().isEmpty()) {
+            return new SellerServerResponse(baseUrl + request.getRequestURI(), "NOT OK",
+                    new SellerResponse(406, "Seller Authentication", "Password field cannot be empty", null));
         }
-        if (Objects.isNull(sellerDto.getPhoneNumber())|| sellerDto.getPhoneNumber().trim().isEmpty()){
-            return new SellerServerResponse(baseUrl+request.getRequestURI(),"NOT OK",
-                    new SellerResponse(406,"Seller Authentication","Phone Number field cannot be empty",null));
+        if (Objects.isNull(sellerDto.getPhoneNumber()) || sellerDto.getPhoneNumber().trim().isEmpty()) {
+            return new SellerServerResponse(baseUrl + request.getRequestURI(), "NOT OK",
+                    new SellerResponse(406, "Seller Authentication", "Phone Number field cannot be empty", null));
         }
-        if (Objects.isNull(sellerDto.getConfirmPassword())|| sellerDto.getConfirmPassword().trim().isEmpty()){
-            return new SellerServerResponse(baseUrl+request.getRequestURI(),"NOT OK",
-                    new SellerResponse(406,"Seller Authentication","Confirm Password is Required",null));
+        if (Objects.isNull(sellerDto.getConfirmPassword()) || sellerDto.getConfirmPassword().trim().isEmpty()) {
+            return new SellerServerResponse(baseUrl + request.getRequestURI(), "NOT OK",
+                    new SellerResponse(406, "Seller Authentication", "Confirm Password is Required", null));
         }
-        if (Objects.isNull(sellerDto.getBusinessName())|| sellerDto.getBusinessName().isEmpty()){
-            return new SellerServerResponse(baseUrl+request.getRequestURI(),"NOT OK",
-                    new SellerResponse(406,"Seller Authentication","Business Name is Required",null));
+        if (Objects.isNull(sellerDto.getBusinessName()) || sellerDto.getBusinessName().isEmpty()) {
+            return new SellerServerResponse(baseUrl + request.getRequestURI(), "NOT OK",
+                    new SellerResponse(406, "Seller Authentication", "Business Name is Required", null));
         }
-        if (!(sellerDto.getPassword().equals(sellerDto.getConfirmPassword()))){
-            return new SellerServerResponse(baseUrl+request.getRequestURI(),"NOT OK",
-                    new SellerResponse(406,"Seller Authentication","Password and Confirm Password are not the same",null));
+        if (!(sellerDto.getPassword().equals(sellerDto.getConfirmPassword()))) {
+            return new SellerServerResponse(baseUrl + request.getRequestURI(), "NOT OK",
+                    new SellerResponse(406, "Seller Authentication", "Password and Confirm Password are not the same", null));
         }
 
-        if (Objects.nonNull(sellerRepository.findByEmail(sellerDto.getEmail()))){
-            return new SellerServerResponse(baseUrl+request.getRequestURI(),"NOT OK",
-                    new SellerResponse(406,"Seller Authentication","Email Address Already taken by another Seller",null));
+        if (Objects.nonNull(sellerRepository.findByEmail(sellerDto.getEmail()))) {
+            return new SellerServerResponse(baseUrl + request.getRequestURI(), "NOT OK",
+                    new SellerResponse(406, "Seller Authentication", "Email Address Already taken by another Seller", null));
         }
 
         AttachmentEntity attachment = attachmentService.saveAttachment(file);
-        if (Objects.isNull(attachment)){
-            return new SellerServerResponse(baseUrl+request.getRequestURI(),"NOT OK",
-                    new SellerResponse(406,"Seller Authentication","Invalid file format, please it's only pdf, docx and jpeg file format that's accepted",null));
+        if (Objects.isNull(attachment)) {
+            return new SellerServerResponse(baseUrl + request.getRequestURI(), "NOT OK",
+                    new SellerResponse(406, "Seller Authentication", "Invalid file format, please it's only pdf, docx and jpeg file format that's accepted", null));
         }
-        String downloadUrl = "download/"+attachment.getId();
+        String downloadUrl = "download/" + attachment.getId();
         String encryptedCustomerPassword = sellerDto.getPassword();
 
         try {
             encryptedCustomerPassword = Utility.hashPassword(sellerDto.getPassword());
-        }catch (Exception e){
+        } catch (Exception e) {
             log.info(e.getMessage());
         }
         SellerEntity seller = SellerEntity.builder()
@@ -118,6 +116,7 @@ public class SellerServiceImpl implements SellerService {
                 .username(sellerDto.getUsername())
                 .email(sellerDto.getEmail())
                 .isVerified(false)
+                .accountStatus(AccountStatus.Active.name())
                 .phoneNumber(sellerDto.getPhoneNumber())
                 .password(encryptedCustomerPassword)
                 .identificationUrl(downloadUrl)
@@ -129,41 +128,40 @@ public class SellerServiceImpl implements SellerService {
         EmailDetails emailDetails = EmailDetails.builder()
                 .subject("ACCOUNT CREATION")
                 .messageBody("To complete your account creation, please click here to verify your email : "
-                        +baseUrl+"/verify-account?token="+authenticationToken.getToken()+"\n\nFrom Vendavault")
+                        + baseUrl + "/verify-account?token=" + authenticationToken.getToken() + "\n\nFrom Vendavault")
                 .recipient(seller.getEmail())
                 .build();
         emailService.sendEmailAlert(emailDetails);
-        System.out.println("Authentication token is "+authenticationToken.getToken());
+        System.out.println("Authentication token is " + authenticationToken.getToken());
 
-        return new SellerServerResponse(baseUrl+request.getRequestURI(),"OK",new SellerResponse(
-                201,"Seller Registration","Your Registration was successful and an email confirmation link has been sent to your email address", SellerModelUtil.getReturnedSeller(seller)
+        return new SellerServerResponse(baseUrl + request.getRequestURI(), "OK", new SellerResponse(
+                201, "Seller Registration", "Your Registration was successful and an email confirmation link has been sent to your email address", SellerModelUtil.getReturnedSeller(seller)
         ));
     }
 
     @Override
     public ResponseEntity<?> confirmEmail(String confirmationToken) throws DataNotFoundException {
         SellerEntity seller = authenticationTokenService.getSellerByToken(confirmationToken);
-        if (seller !=null){
+        if (seller != null) {
             seller.setVerified(true);
             sellerRepository.save(seller);
-        return ResponseEntity.ok("Email verified successfully!");
-    }
+            return ResponseEntity.ok("Email verified successfully!");
+        }
         return ResponseEntity.badRequest().body("Error: Couldn't verify email");
-}
+    }
 
     @Override
     public SellerServerResponse getSellerByEmail(String email, HttpServletRequest request) {
         SellerEntity seller = sellerRepository.findByEmail(email);
-        if (Objects.isNull(seller)){
-            return new SellerServerResponse(baseUrl+request.getRequestURI(),"NOT OK",new SellerResponse(
-                    406,"Seller Authentication","There is no seller with the provided email address",null
+        if (Objects.isNull(seller)) {
+            return new SellerServerResponse(baseUrl + request.getRequestURI(), "NOT OK", new SellerResponse(
+                    406, "Seller Authentication", "There is no seller with the provided email address", null
             ));
         }
-        return new SellerServerResponse(baseUrl+request.getRequestURI(),"OK",new SellerResponse(
-                200,"Seller Authentication","Seller Found",SellerModelUtil.getReturnedSeller(seller)
+        return new SellerServerResponse(baseUrl + request.getRequestURI(), "OK", new SellerResponse(
+                200, "Seller Authentication", "Seller Found", SellerModelUtil.getReturnedSeller(seller)
         ));
     }
-
     @Override
     public SellerEntity findSellerByEmail(String email) {
         SellerEntity seller = sellerRepository.findByEmail(email);
@@ -217,6 +215,11 @@ public class SellerServiceImpl implements SellerService {
             if (!seller.isVerified()){
                 return new SellerServerResponse(baseUrl+request.getRequestURI(),"NOT OK",new SellerResponse(
                         406,"Seller Authentication","This user has not been verified",null
+                ));
+            }
+            if (seller.getAccountStatus().equalsIgnoreCase(AccountStatus.Suspended.name())){
+                return new SellerServerResponse(baseUrl+request.getRequestURI(),"NOT OK",new SellerResponse(
+                        406,"Seller Authentication","Your account has been suspended",null
                 ));
             }
         }

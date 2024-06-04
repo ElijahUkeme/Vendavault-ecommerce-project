@@ -27,6 +27,7 @@ public class ProductModel {
     private BigDecimal price;
     private String description;
     private String status;
+    private String paymentStatus;
     private Date uploadedDate;
     private Date approvedOrRejectedDate;
     private Date updatedDate;

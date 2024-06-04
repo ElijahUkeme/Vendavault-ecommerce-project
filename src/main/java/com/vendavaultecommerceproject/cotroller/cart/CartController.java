@@ -17,23 +17,23 @@ public class CartController {
     public CartController(CartService cartService) {
         this.cartService = cartService;
     }
-    @PostMapping("/product/addToCart")
+    @PostMapping("/cart/product/addToCart")
     public CartServerResponse addToCart(@RequestBody AddToCartDto addToCartDto, HttpServletRequest request){
         return cartService.addProductToCart(addToCartDto,request);
     }
 
-    @PostMapping("/cartItem/quantity/update")
+    @PostMapping("/cart/cartItem/quantity/update")
     public CartServerResponse updateCartQuantity(@RequestBody UpdateQuantityDto updateQuantityDto,HttpServletRequest request){
         return cartService.updateQuantity(updateQuantityDto,request);
     }
 
-    @DeleteMapping("/cartItem/delete")
+    @DeleteMapping("/cart/cartItem/delete/{itemId}")
     public CartServerResponse deleteCartItem(@PathVariable("itemId")Long itemId,HttpServletRequest request){
         return cartService.deleteCartItem(itemId,request);
     }
 
 
-    @PostMapping("/cartItems/forBuyer")
+    @PostMapping("/cart/cartItems/for/buyer")
     public CartListServerResponse allItemsInTheCartForTheUser(@RequestBody BuyerCartItemDto buyerCartItemDto,HttpServletRequest request){
         return cartService.getAllItemsInTheCartForBuyer(buyerCartItemDto,request);
     }

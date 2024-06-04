@@ -1,4 +1,4 @@
-package com.vendavaultecommerceproject.payment.dto;
+package com.vendavaultecommerceproject.payment.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

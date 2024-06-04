@@ -3,6 +3,7 @@ package com.vendavaultecommerceproject.service.impl.attachment;
 import com.vendavaultecommerceproject.entities.attachment.AttachmentEntity;
 import com.vendavaultecommerceproject.repository.attachment.AttachmentRepository;
 import com.vendavaultecommerceproject.service.main.attachment.AttachmentService;
+import com.vendavaultecommerceproject.util.constants.AppStrings;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -23,11 +24,10 @@ public class AttachmentServiceImpl implements AttachmentService {
         try {
 
             if (!(StringUtils.endsWithIgnoreCase(fileName,"pdf")||StringUtils.endsWithIgnoreCase(fileName,"jpg"))){
-                System.out.println("Only the aforementioned format is accepted");
-                throw new Exception("Only pdf, docx and jpeg file is accepted");
+                throw new Exception(AppStrings.attachmentMessage);
             }
             if (fileName.contains("..")){
-                throw new Exception("File Name Contains invalid character");
+                throw new Exception(AppStrings.invalidFieldMessage);
             }else {
                 AttachmentEntity attachment = new AttachmentEntity(file.getContentType(),fileName,file.getBytes());
                 return attachmentRepository.save(attachment);
@@ -42,6 +42,6 @@ public class AttachmentServiceImpl implements AttachmentService {
     @Override
     public AttachmentEntity getAttachment(String attachmentId) throws Exception {
         return attachmentRepository.findById(attachmentId)
-                .orElseThrow(()->new Exception("Attachment Id not Found"));
+                .orElseThrow(()->new Exception(AppStrings.fileIdNotFoundMessage));
     }
 }

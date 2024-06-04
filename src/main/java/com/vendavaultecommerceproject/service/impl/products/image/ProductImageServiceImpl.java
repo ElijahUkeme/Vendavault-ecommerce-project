@@ -1,6 +1,7 @@
 package com.vendavaultecommerceproject.service.impl.products.image;
 
 import com.vendavaultecommerceproject.entities.product.image.ProductImageEntity;
+import com.vendavaultecommerceproject.exception.exeception.DataNotAcceptableException;
 import com.vendavaultecommerceproject.repository.products.image.ProductImageRepository;
 import com.vendavaultecommerceproject.service.main.products.image.ProductImageService;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class ProductImageServiceImpl implements ProductImageService {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
 
         if (fileName.contains("..")) {
-            throw new Exception("File Name Contains invalid character");
+            throw new DataNotAcceptableException("File Name Contains invalid character");
         } else {
             ProductImageEntity productImageEntity = new ProductImageEntity(file.getContentType(), fileName, file.getBytes());
             return productImageRepository.save(productImageEntity);

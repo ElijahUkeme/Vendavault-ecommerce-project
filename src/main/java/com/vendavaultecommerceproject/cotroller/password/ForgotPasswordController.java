@@ -30,33 +30,33 @@ public class ForgotPasswordController {
     }
 
 
-    @PostMapping("/user/otp/request")
+    @PostMapping("/password/user/otp/request")
     public ServerResponse userRequestOtp(@RequestBody RequestOtpDto requestOtpDto, HttpServletRequest request){
         return forgotPasswordService.userForgotPassword(requestOtpDto,request);
     }
 
 
-    @PostMapping("/user/otp/verify")
+    @PostMapping("/password/user/otp/verify")
     public ServerResponse userVerifyOtp(@RequestBody ForgotPasswordDto forgotPasswordDto,HttpServletRequest request){
         return forgotPasswordService.userVerifyOtp(forgotPasswordDto,request);
     }
 
-    @PostMapping("/user/password/reset")
+    @PostMapping("/password/user/reset")
     public ServerResponse resetPassword(@RequestBody ResetPasswordDto resetPasswordDto,HttpServletRequest request) throws NoSuchAlgorithmException {
         return userService.resetPassword(resetPasswordDto,request);
     }
 
-    @PostMapping("/seller/password/reset")
+    @PostMapping("/password/seller/reset")
     public SellerServerResponse resetSellerPassword(@RequestBody ResetPasswordDto resetPasswordDto,HttpServletRequest request) throws NoSuchAlgorithmException {
         return service.resetPassword(resetPasswordDto,request);
     }
 
-    @PostMapping("/seller/otp/request")
+    @PostMapping("/password/seller/otp/request")
     public SellerServerResponse sellerVerifyOtp(@RequestBody RequestOtpDto requestOtpDto,HttpServletRequest request){
         return forgotPasswordService.sellerForgotPassword(requestOtpDto,request);
     }
 
-    @PostMapping("/seller/otp/verify")
+    @PostMapping("/password/seller/otp/verify")
     public SellerServerResponse sellerOtpVerify(@RequestBody ForgotPasswordDto forgotPasswordDto,HttpServletRequest request){
         return forgotPasswordService.sellerVerifyOtp(forgotPasswordDto,request);
     }

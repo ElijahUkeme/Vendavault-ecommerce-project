@@ -16,6 +16,8 @@ import com.vendavaultecommerceproject.response.cart.CartListServerResponse;
 import com.vendavaultecommerceproject.response.cart.CartResponse;
 import com.vendavaultecommerceproject.response.cart.CartServerResponse;
 import com.vendavaultecommerceproject.service.main.cart.CartService;
+import com.vendavaultecommerceproject.util.constants.ApiConstant;
+import com.vendavaultecommerceproject.util.constants.AppStrings;
 import com.vendavaultecommerceproject.utils.CartModelUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -44,27 +46,27 @@ public class CartServiceImpl implements CartService {
     public CartServerResponse addProductToCart(AddToCartDto addToCartDto, HttpServletRequest request) {
         ProductEntity product = productRepository.findByProductId(addToCartDto.getProductId());
         if (Objects.isNull(product)){
-            return new CartServerResponse(baseUrl+request.getRequestURI(),"NOT OK",new CartResponse(
-                    406,"Product Authentication","Product id not found",null
+            return new CartServerResponse(baseUrl+request.getRequestURI(),AppStrings.statusNotOk,new CartResponse(
+                    ApiConstant.STATUS_CODE_NOT_FOUND, AppStrings.productAuthenticationHeadingMessage,AppStrings.productIdNotFoundMessage,null
             ));
         }
         UserEntity buyer = userRepository.findByEmail(addToCartDto.getBuyerEmail());
         if (Objects.isNull(buyer)){
-            return new CartServerResponse(baseUrl+request.getRequestURI(),"NOT OK",new CartResponse(
-                    406,"Buyer Authentication","Buyer email not found",null
+            return new CartServerResponse(baseUrl+request.getRequestURI(),AppStrings.statusNotOk,new CartResponse(
+                    ApiConstant.STATUS_CODE_NOT_FOUND,AppStrings.buyerAuthenticationHeading,AppStrings.buyerEmailNotFoundMessage,null
             ));
         }
         if (addToCartDto.getQuantity() <1){
-            return new CartServerResponse(baseUrl+request.getRequestURI(),"NOT OK",new CartResponse(
-                    406,"Product Authentication","Quantity must be at least 1",null
+            return new CartServerResponse(baseUrl+request.getRequestURI(),AppStrings.statusNotOk,new CartResponse(
+                    ApiConstant.STATUS_CODE_NOT_FOUND,AppStrings.productAuthenticationHeadingMessage,AppStrings.productLowQuantityMessage,null
             ));
         }
         //first of all check if the user has already added that product to his cart
         //will demand that he/she should rather update the one added already
         //rather than adding it again and again
         if (isUserAlreadyHasThisProductInHisCart(buyer,product)){
-            return new CartServerResponse(baseUrl+request.getRequestURI(),"NOT OK",new CartResponse(
-                    409,"Cart Authentication","You have already added this product to the cart, update it instead",null
+            return new CartServerResponse(baseUrl+request.getRequestURI(),AppStrings.statusNotOk,new CartResponse(
+                    ApiConstant.STATUS_CODE_NOT_ACCEPTED,AppStrings.cartAuthenticationHeadingMessage,AppStrings.productAuthenticationHeadingMessage,null
             ));
         }
         CartItemEntity cartItem = CartItemEntity.builder()
@@ -79,8 +81,8 @@ public class CartServiceImpl implements CartService {
                 .build();
         cartRepository.save(cartItem);
 
-        return new CartServerResponse(baseUrl+request.getRequestURI(),"OK",new CartResponse(
-                200,"Cart Authentication","Product added to Cart Successfully", CartModelUtil.getReturnedCartModel(cartItem)
+        return new CartServerResponse(baseUrl+request.getRequestURI(),AppStrings.statusOk,new CartResponse(
+                ApiConstant.STATUS_CODE_OK,AppStrings.cartAuthenticationHeadingMessage,AppStrings.productAddedToCartSuccessMessage, CartModelUtil.getReturnedCartModel(cartItem)
         ));
     }
 
@@ -88,14 +90,14 @@ public class CartServiceImpl implements CartService {
     public CartServerResponse updateQuantity(UpdateQuantityDto updateQuantityDto, HttpServletRequest request) {
         Optional<CartItemEntity> cartItem = cartRepository.findById(updateQuantityDto.getCartId());
         if (Objects.isNull(cartItem)){
-            return new CartServerResponse(baseUrl+request.getRequestURI(),"NOT OK",new CartResponse(
-                    406,"Cart Authentication","Cart Item Id not found",null
+            return new CartServerResponse(baseUrl+request.getRequestURI(),AppStrings.statusNotOk,new CartResponse(
+                    ApiConstant.STATUS_CODE_NOT_FOUND,AppStrings.cartAuthenticationHeadingMessage,AppStrings.cartItemIdNotFoundMessage,null
             ));
         }
         cartItem.get().setQuantity(updateQuantityDto.getQuantity());
         cartRepository.save(cartItem.get());
-        return new CartServerResponse(baseUrl+request.getRequestURI(),"OK",new CartResponse(
-                200,"Cart Authentication","Cart Item Updated Successfully", CartModelUtil.getReturnedCartModel(cartItem.get())
+        return new CartServerResponse(baseUrl+request.getRequestURI(),AppStrings.statusOk,new CartResponse(
+                ApiConstant.STATUS_CODE_OK,AppStrings.cartAuthenticationHeadingMessage,AppStrings.cartItemUpdateMessage, CartModelUtil.getReturnedCartModel(cartItem.get())
         ));
     }
 
@@ -103,13 +105,13 @@ public class CartServiceImpl implements CartService {
     public CartServerResponse deleteCartItem(Long itemId, HttpServletRequest request) {
         Optional<CartItemEntity> cartItem = cartRepository.findById(itemId);
         if (Objects.isNull(cartItem)){
-            return new CartServerResponse(baseUrl+request.getRequestURI(),"NOT OK",new CartResponse(
-                    406,"Cart Authentication","Cart Item Id not found",null
+            return new CartServerResponse(baseUrl+request.getRequestURI(),AppStrings.statusNotOk,new CartResponse(
+                    ApiConstant.STATUS_CODE_NOT_FOUND,AppStrings.cartAuthenticationHeadingMessage,AppStrings.cartItemIdNotFoundMessage,null
             ));
         }
         cartRepository.delete(cartItem.get());
-        return new CartServerResponse(baseUrl+request.getRequestURI(),"OK",new CartResponse(
-                200,"Cart Item Deletion","Cart Item deleted Successfully", CartModelUtil.getReturnedCartModel(cartItem.get())
+        return new CartServerResponse(baseUrl+request.getRequestURI(),AppStrings.statusOk,new CartResponse(
+                ApiConstant.STATUS_CODE_OK,AppStrings.cartItemDeletionHeadingMessage,AppStrings.cartItemDeletionMessage, CartModelUtil.getReturnedCartModel(cartItem.get())
         ));
     }
 

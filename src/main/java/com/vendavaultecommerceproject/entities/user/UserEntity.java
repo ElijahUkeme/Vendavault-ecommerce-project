@@ -21,6 +21,7 @@ public class UserEntity {
     private String username;
     private String email;
     private String password;
+    private String accountStatus;
     private boolean isVerified;
     private String phoneNumber;
 
