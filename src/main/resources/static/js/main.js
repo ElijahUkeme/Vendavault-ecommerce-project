@@ -40,12 +40,12 @@ function onConnected() {
         {},
         JSON.stringify({userName: username, fullName: fullname, status: 'Online'})
     );
-    document.querySelector('#connected-user-fullName').textContent = fullname;
+    document.querySelector('#connected-user-fullname').textContent = fullname;
     findAndDisplayConnectedUsers().then();
 }
 
 async function findAndDisplayConnectedUsers() {
-    const connectedUsersResponse = await fetch('/users/all');
+    const connectedUsersResponse = await fetch('/users');
     let connectedUsers = await connectedUsersResponse.json();
     connectedUsers = connectedUsers.filter(user => user.userName !== username);
     const connectedUsersList = document.getElementById('connectedUsers');
@@ -145,7 +145,7 @@ function sendMessage(event) {
             timestamp: new Date()
         };
         stompClient.send("/app/chat", {}, JSON.stringify(chatMessage));
-        displayMessage(nickname, messageInput.value.trim());
+        displayMessage(username, messageInput.value.trim());
         messageInput.value = '';
     }
     chatArea.scrollTop = chatArea.scrollHeight;

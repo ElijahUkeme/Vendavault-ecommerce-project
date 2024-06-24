@@ -6,6 +6,7 @@ import com.vendavaultecommerceproject.dto.product.UpdateProductDto;
 import com.vendavaultecommerceproject.dto.product.UploadProductDto;
 import com.vendavaultecommerceproject.dto.user.RetrieveUserDto;
 import com.vendavaultecommerceproject.entities.product.image.ProductImageEntity;
+import com.vendavaultecommerceproject.exception.exeception.DataNotFoundException;
 import com.vendavaultecommerceproject.payment.response.common.CustomPaymentResponse;
 import com.vendavaultecommerceproject.response.pagination.ProductPageResponse;
 import com.vendavaultecommerceproject.response.product.ProductServerListResponse;
@@ -17,12 +18,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.xml.transform.Source;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 public class ProductController {
@@ -36,9 +42,14 @@ public class ProductController {
     }
 
     @PostMapping("/product/upload")
-    public ResponseEntity<CustomPaymentResponse> uploadProduct(@RequestParam("productImage")MultipartFile file,
+    public ResponseEntity<CustomPaymentResponse> uploadProduct(@RequestParam("productImage")MultipartFile[] files,
                                                                @RequestPart("product")UploadProductDto uploadProductDto, HttpServletRequest request) throws Exception {
-        return productService.uploadProduct(uploadProductDto,file,request);
+        return productService.uploadProduct(uploadProductDto,files,request);
+    }
+
+    @PostMapping("/product/image-upload")
+    public ResponseEntity<Set<ProductImageEntity>> uploadProductImage(@RequestParam("productImage")MultipartFile[] files) throws Exception {
+        return new ResponseEntity<>(productImageService.uploadProduct(files), HttpStatus.OK);
     }
 
     @GetMapping("/retrieved/{productImageId}")
@@ -52,7 +63,7 @@ public class ProductController {
     }
 
     @PostMapping("products/admin/access")
-    public ProductServerResponse approveOrRejectProduct(@RequestBody ApprovedOrRejectProductDto approvedOrRejectProductDto, HttpServletRequest request){
+    public ProductServerResponse approveOrRejectProduct(@RequestBody ApprovedOrRejectProductDto approvedOrRejectProductDto, HttpServletRequest request) throws ExecutionException, InterruptedException, DataNotFoundException {
         return  productService.approveOrRejectProductByAdmin(approvedOrRejectProductDto,request);
     }
 

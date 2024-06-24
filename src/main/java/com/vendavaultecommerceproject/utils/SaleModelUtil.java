@@ -25,7 +25,6 @@ public class SaleModelUtil {
                 .paymentType(sale.getPaymentType())
                 .cartModels(cartModels)
                 .deliveredPersonName(sale.getDeliveredPersonName())
-                .seller(SellerModelUtil.getReturnedSeller(sale.getSeller()))
                 .status(sale.getStatus())
                 .totalPrice(BigDecimal.valueOf(sale.getTotalPrice()))
                 .build();

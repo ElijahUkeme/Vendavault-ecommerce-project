@@ -9,8 +9,14 @@ import com.vendavaultecommerceproject.entities.sale.SaleEntity;
 import com.vendavaultecommerceproject.entities.seller.SellerEntity;
 import com.vendavaultecommerceproject.entities.user.UserEntity;
 import com.vendavaultecommerceproject.exception.exeception.DataNotFoundException;
-import com.vendavaultecommerceproject.model.email.EmailDetails;
 import com.vendavaultecommerceproject.model.sales.SaleModel;
+import com.vendavaultecommerceproject.notification.dto.DevicesNotificationRequest;
+import com.vendavaultecommerceproject.notification.dto.SaveNotificationDto;
+import com.vendavaultecommerceproject.notification.model.NotificationModel;
+import com.vendavaultecommerceproject.notification.service.main.FCMService;
+import com.vendavaultecommerceproject.notification.service.main.admin.AdminNotificationService;
+import com.vendavaultecommerceproject.notification.service.main.seller.SellerNotificationService;
+import com.vendavaultecommerceproject.notification.service.main.user.UserNotificationService;
 import com.vendavaultecommerceproject.payment.enums.PaymentStatus;
 import com.vendavaultecommerceproject.payment.enums.PaymentType;
 import com.vendavaultecommerceproject.payment.response.common.CustomPaymentResponse;
@@ -27,10 +33,10 @@ import com.vendavaultecommerceproject.service.main.products.product.ProductServi
 import com.vendavaultecommerceproject.service.main.sale.SaleService;
 import com.vendavaultecommerceproject.service.main.seller.SellerService;
 import com.vendavaultecommerceproject.service.main.user.UserService;
-import com.vendavaultecommerceproject.util.constants.EmailTextConstants;
 import com.vendavaultecommerceproject.utils.SaleModelUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 
 @Service
@@ -52,11 +59,15 @@ public class SaleServiceImpl implements SaleService {
     private final EmailService emailService;
     private final OrderTokenService orderTokenService;
     private final UserPayStackPaymentService userPayStackPaymentService;
+    private final FCMService fcmService;
+    private final UserNotificationService userNotificationService;
+    private final SellerNotificationService sellerNotificationService;
+    private final AdminNotificationService adminNotificationService;
 
     @Value("${baseUrl}")
     private String baseUrl;
 
-    public SaleServiceImpl(SaleRepository saleRepository, ProductService productService, UserService userService, SellerService sellerService, CartRepository cartRepository, EmailService emailService, OrderTokenService orderTokenService, UserPayStackPaymentService userPayStackPaymentService) {
+    public SaleServiceImpl(SaleRepository saleRepository, ProductService productService, UserService userService, SellerService sellerService, CartRepository cartRepository, EmailService emailService, OrderTokenService orderTokenService, UserPayStackPaymentService userPayStackPaymentService, FCMService fcmService, UserNotificationService userNotificationService, SellerNotificationService sellerNotificationService, AdminNotificationService adminNotificationService) {
         this.saleRepository = saleRepository;
         this.productService = productService;
         this.userService = userService;
@@ -65,10 +76,14 @@ public class SaleServiceImpl implements SaleService {
         this.emailService = emailService;
         this.orderTokenService = orderTokenService;
         this.userPayStackPaymentService = userPayStackPaymentService;
+        this.fcmService = fcmService;
+        this.userNotificationService = userNotificationService;
+        this.sellerNotificationService = sellerNotificationService;
+        this.adminNotificationService = adminNotificationService;
     }
 
     @Override
-    public ResponseEntity<CustomPaymentResponse> saleProduct(SaleDto saleDto) {
+    public ResponseEntity<CustomPaymentResponse> saleProduct(SaleDto saleDto) throws DataNotFoundException, ExecutionException, InterruptedException {
         UserEntity buyer = userService.findUserByEmail(saleDto.getBuyerEmail());
         if (Objects.isNull(buyer)){
             return ResponseEntity.badRequest().body(new CustomPaymentResponse(false,"Buyer Email Address not found",null));
@@ -103,56 +118,36 @@ public class SaleServiceImpl implements SaleService {
 
             updateCartItemCheckOutStatus(getAllCartItemForTheBuyer(buyer));
 
-            //send a delivery token to the buyer email address
-            //to be provided during delivery for confirmation
-//            EmailDetails buyerMail = EmailDetails.builder()
-//                    .subject(EmailTextConstants.Subject)
-//                    .messageBody(EmailTextConstants.message+orderToken.getToken()+EmailTextConstants.mailEnding)
-//                    .recipient(buyer.getEmail())
-//                    .build();
-//            emailService.sendEmailAlert(buyerMail);
+            //Drop an order update to the owners of the products ordered
+            getAllProductOwners(sale);
+            //drop an order update to the admin as well
+            notifyAdminOnOrderRequest(buyer.getUsername());
+            //sendPushNotification(sale);
+            //orderNotification(saleDto.getSellerEmail(),sale.getCartItemList(),saleDto, sale.getId(), sale.getPaymentStatus());
 
-
-            //notify the seller that an order has been placed for delivery
-//            EmailDetails sellerMail = EmailDetails.builder()
-//                    .subject(EmailTextConstants.Subject)
-//                    .messageBody(EmailTextConstants.sellerMessage+EmailTextConstants.mailEnding)
-//                    .recipient(sale.getSeller().getEmail())
-//                    .build();
-//
-//            emailService.sendEmailAlert(sellerMail);
-            System.out.println("Order token is "+orderToken.getToken());
+            //Remove the items from the cart
+            clearCartItem(buyer);
             return ResponseEntity.ok().body(new
                     CustomPaymentResponse(true,"Your order has been placed Successfully",null));
         }else {
 
             //proceed for an online payment
-            sale.setSeller(getAllCartItemForTheBuyer(buyer).get(0).getSeller());
             saleRepository.save(sale);
             final OrderTokenEntity orderToken = new OrderTokenEntity(sale);
             orderTokenService.saveOrderToken(orderToken);
 
             updateCartItemCheckOutStatus(getAllCartItemForTheBuyer(buyer));
 
-//            EmailDetails buyerMail = EmailDetails.builder()
-//                    .subject(EmailTextConstants.Subject)
-//                    .messageBody(EmailTextConstants.message+orderToken.getToken()+EmailTextConstants.mailEnding)
-//                    .recipient(buyer.getEmail())
-//                    .build();
-//            emailService.sendEmailAlert(buyerMail);
+            //Drop an order update to the owners of the products ordered
+            getAllProductOwners(sale);
+            //update the admin also for order placed
+            notifyAdminOnOrderRequest(buyer.getUsername());
+            //sendPushNotification(sale);
+            //orderNotification(saleDto.getSellerEmail(),sale.getCartItemList(),saleDto, sale.getId(), sale.getPaymentStatus());
 
-
-            //notify the seller that an order has been placed for delivery
-            EmailDetails sellerMail = EmailDetails.builder()
-                    .subject(EmailTextConstants.Subject)
-                    .messageBody(EmailTextConstants.sellerMessage+EmailTextConstants.mailEnding)
-                    .recipient(sale.getSeller().getEmail())
-                    .build();
-
-            //emailService.sendEmailAlert(sellerMail);
+            //Remove the items from the cart
+            clearCartItem(buyer);
             return userPayStackPaymentService.initializePayment(sale.getId());
-            //return null;
-
         }
     }
 
@@ -173,15 +168,48 @@ public class SaleServiceImpl implements SaleService {
         ));
     }
 
+//    @Override
+//    public SaleListServerResponse getSaleForTheSeller(RetrieveUserDto retrieveUserDto, HttpServletRequest request) {
+//        SellerEntity seller = sellerService.findSellerByEmail(retrieveUserDto.getEmail());
+//        if (Objects.isNull(seller)){
+//            return new SaleListServerResponse(baseUrl+request.getRequestURI(),"NOT Ok",
+//                    new SaleListResponse(406,"Sales Information","The provided user not found as a Seller",null));
+//        }
+//        return new SaleListServerResponse(baseUrl+request.getRequestURI(),"Ok",
+//                new SaleListResponse(200,"Sales Information","All your Sales",getSaleForTheSeller(seller)));
+//    }
+
     @Override
-    public SaleListServerResponse getSaleForTheSeller(RetrieveUserDto retrieveUserDto, HttpServletRequest request) {
-        SellerEntity seller = sellerService.findSellerByEmail(retrieveUserDto.getEmail());
+    public ResponseEntity<List<NotificationModel>> allOrdersForTheSeller(RetrieveUserDto userDto) throws DataNotFoundException {
+        SellerEntity seller = sellerService.findSellerByEmail(userDto.getEmail());
         if (Objects.isNull(seller)){
-            return new SaleListServerResponse(baseUrl+request.getRequestURI(),"NOT Ok",
-                    new SaleListResponse(406,"Sales Information","The provided user not found as a Seller",null));
+            throw new DataNotFoundException("There is no seller with this email");
         }
-        return new SaleListServerResponse(baseUrl+request.getRequestURI(),"Ok",
-                new SaleListResponse(200,"Sales Information","All your Sales",getSaleForTheSeller(seller)));
+        List<NotificationModel> models = new ArrayList<>();
+        List<SaleEntity> saleEntities = saleRepository.findAll();
+        List<CartItemEntity> sellerOrderItems = new ArrayList<>();
+        double amount = 0;
+        for (SaleEntity sale:saleEntities){
+            List<CartItemEntity> cartItemEntityList = sale.getCartItemList().stream().toList();
+            for (CartItemEntity cartItemEntity : cartItemEntityList) {
+                if (cartItemEntity.getProduct().getProductOwner().equals(seller)) {
+                    sellerOrderItems.add(cartItemEntity);
+
+                }
+                    amount +=cartItemEntity.getTotalPrice();
+                    NotificationModel notificationModel = NotificationModel.builder()
+                            .orderId(sale.getId())
+                            .deliveredPersonPhone(sale.getDeliveredPhone())
+                            .orderedDate(sale.getDatePurchased())
+                            .deliveredPersonAddress(sale.getDeliveredAddress())
+                            .deliveredPersonName(sale.getDeliveredPersonName())
+                            .totalAmount(amount)
+                            .cartItems(sellerOrderItems)
+                            .build();
+                    models.add(notificationModel);
+            }
+        }
+        return new ResponseEntity<>(models,HttpStatus.OK);
     }
 
     @Override
@@ -197,14 +225,14 @@ public class SaleServiceImpl implements SaleService {
         }
         return saleModels;
     }
-    private List<SaleModel> getSaleForTheSeller(SellerEntity seller){
-        List<SaleEntity> saleEntities = saleRepository.findBySeller(seller);
-        List<SaleModel> saleModels = new ArrayList<>();
-        for (SaleEntity sale: saleEntities){
-            saleModels.add(SaleModelUtil.getReturnedSaleModel(sale));
-        }
-        return saleModels;
-    }
+//    private List<SaleModel> getSaleForTheSeller(SellerEntity seller){
+//        List<SaleEntity> saleEntities = saleRepository.findBySeller(seller);
+//        List<SaleModel> saleModels = new ArrayList<>();
+//        for (SaleEntity sale: saleEntities){
+//            saleModels.add(SaleModelUtil.getReturnedSaleModel(sale));
+//        }
+//        return saleModels;
+//    }
 
     List<CartItemEntity> getAllCartItemForTheBuyer(UserEntity user){
         List<CartItemEntity> cartItemEntityList =  cartRepository.findByBuyer(user);
@@ -235,5 +263,78 @@ public class SaleServiceImpl implements SaleService {
             cartItem.setCheckOut(true);
             cartRepository.save(cartItem);
         }
+    }
+    private ResponseEntity<NotificationModel> orderNotification(String sellerEmail,List<CartItemEntity>cartItems,SaleDto saleDto,Long orderId,String paymentStatus) throws DataNotFoundException {
+        SellerEntity seller = sellerService.findSellerByEmail(sellerEmail);
+        if (Objects.isNull(seller)){
+            throw new DataNotFoundException("Seller Email not found");
+        }
+        double totalAmount = 0;
+        List<CartItemEntity> cartItemEntityList = new ArrayList<>();
+        for (CartItemEntity cartItem:cartItems){
+
+            if (cartItem.getProduct().getProductOwner()==seller){
+                totalAmount +=cartItem.getTotalPrice();
+                cartItemEntityList.add(cartItem);
+            }
+        }
+        NotificationModel notificationModel = NotificationModel.builder()
+                .orderId(orderId)
+                .orderedDate(new Date())
+                .deliveredPersonAddress(saleDto.getDeliveredAddress())
+                .deliveredPersonPhone(saleDto.getDeliveredPhone())
+                .deliveredPersonName(saleDto.getDeliveredPersonName())
+                .paymentStatus(paymentStatus)
+                .cartItems(cartItemEntityList)
+                .totalAmount(totalAmount)
+                .build();
+
+        return new ResponseEntity<>(notificationModel, HttpStatus.OK);
+    }
+
+    private void clearCartItem(UserEntity user){
+        for (CartItemEntity cartItem: getAllCartItemForTheBuyer(user)){
+            cartRepository.delete(cartItem);
+        }
+    }
+    private void sendPushNotification(SaleEntity sale) throws ExecutionException, InterruptedException {
+        List<CartItemEntity> orderItems = sale.getCartItemList();
+        List<SellerEntity> sellerEntities = new ArrayList<>();
+        for(CartItemEntity cartItem: orderItems){
+            sellerEntities.add(cartItem.getSeller());
+        }
+        for (SellerEntity seller: sellerEntities){
+            notifySellers(seller.getFcmToken());
+        }
+    }
+    private void notifySellers(String deviceToken) throws ExecutionException, InterruptedException {
+        DevicesNotificationRequest devicesNotificationRequest = new DevicesNotificationRequest();
+        devicesNotificationRequest.setDeviceToken(deviceToken);
+        devicesNotificationRequest.setTitle("Order Notification");
+        devicesNotificationRequest.setBody("An order has been placed for delivery,\ncheck your order dashboard for the items");
+        fcmService.sendNotificationToDevice(devicesNotificationRequest);
+    }
+    private void notifySellersOnOrderPlaced(String sellerEmail,String buyerName) throws DataNotFoundException {
+        SaveNotificationDto saveNotificationDto = SaveNotificationDto.builder()
+                .title("Product Order Notification")
+                .message(buyerName+" placed an order for your delivery,check your page for it")
+                .email(sellerEmail)
+                .build();
+        sellerNotificationService.saveNotification(saveNotificationDto);
+    }
+    private void getAllProductOwners(SaleEntity sale) throws DataNotFoundException {
+        List<CartItemEntity> cartItemEntityList = sale.getCartItemList().stream().toList();
+        for (CartItemEntity cartItemEntity : cartItemEntityList) {
+            notifySellersOnOrderPlaced(cartItemEntity.getSeller().getEmail(),sale.getBuyer().getUsername());
+        }
+    }
+
+    private void notifyAdminOnOrderRequest(String buyerName) throws DataNotFoundException {
+        SaveNotificationDto saveNotificationDto = SaveNotificationDto.builder()
+                .title("Order request Update")
+                .message("An order has been placed by "+buyerName+",check the order dashboard for follow up")
+                .email("admin@gmail.com")
+                .build();
+        adminNotificationService.saveNotification(saveNotificationDto);
     }
 }

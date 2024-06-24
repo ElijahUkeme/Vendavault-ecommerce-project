@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class SaleDto {
     private String paymentType;
     private String buyerEmail;
+    private String sellerEmail;
     private String deliveredPersonName;
     private String deliveredAddress;
     private String deliveredPhone;

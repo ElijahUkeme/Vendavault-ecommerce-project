@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Set;
 
 
 @NoArgsConstructor
@@ -31,6 +32,7 @@ public class ProductModel {
     private Date uploadedDate;
     private Date approvedOrRejectedDate;
     private Date updatedDate;
-    private String productImage;
+    private Set<ProductImageModel> productImages;
     private SellerModel sellerModel;
+
 }

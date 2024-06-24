@@ -1,6 +1,7 @@
 package com.vendavaultecommerceproject.service.impl.products.product;
 
 
+import com.vendavaultecommerceproject.admin.service.main.AdminRegistrationService;
 import com.vendavaultecommerceproject.dto.product.ApprovedOrRejectProductDto;
 import com.vendavaultecommerceproject.dto.product.UpdateProductDto;
 import com.vendavaultecommerceproject.dto.product.UploadProductDto;
@@ -11,6 +12,11 @@ import com.vendavaultecommerceproject.entities.product.image.ProductImageEntity;
 import com.vendavaultecommerceproject.entities.seller.SellerEntity;
 import com.vendavaultecommerceproject.exception.exeception.DataNotFoundException;
 import com.vendavaultecommerceproject.model.product.ProductModel;
+import com.vendavaultecommerceproject.notification.dto.DevicesNotificationRequest;
+import com.vendavaultecommerceproject.notification.dto.SaveNotificationDto;
+import com.vendavaultecommerceproject.notification.service.main.FCMService;
+import com.vendavaultecommerceproject.notification.service.main.admin.AdminNotificationService;
+import com.vendavaultecommerceproject.notification.service.main.seller.SellerNotificationService;
 import com.vendavaultecommerceproject.payment.enums.PaymentStatus;
 import com.vendavaultecommerceproject.payment.response.common.CustomPaymentResponse;
 import com.vendavaultecommerceproject.payment.service.seller.SellerPayStackService;
@@ -26,6 +32,7 @@ import com.vendavaultecommerceproject.service.main.products.image.ProductImageSe
 import com.vendavaultecommerceproject.service.main.products.product.ProductService;
 import com.vendavaultecommerceproject.utils.ProductModelUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,8 +43,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 @Service
+@Slf4j
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
@@ -45,55 +54,60 @@ public class ProductServiceImpl implements ProductService {
     private final ProductImageService productImageService;
     private final CategoryService categoryService;
     private final SellerPayStackService sellerPayStackService;
+    private final FCMService fcmService;
+    private final SellerNotificationService sellerNotificationService;
+    private final AdminNotificationService adminNotificationService;
     @Value("${baseUrl}")
     private String baseUrl;
 
-    public ProductServiceImpl(ProductRepository productRepository, SellerRepository sellerRepository, ProductImageService productImageService, CategoryService categoryService, SellerPayStackService sellerPayStackService) {
+    public ProductServiceImpl(ProductRepository productRepository, SellerRepository sellerRepository, ProductImageService productImageService, CategoryService categoryService, SellerPayStackService sellerPayStackService, FCMService fcmService, SellerNotificationService sellerNotificationService, AdminNotificationService adminNotificationService) {
         this.productRepository = productRepository;
         this.sellerRepository = sellerRepository;
         this.productImageService = productImageService;
         this.categoryService = categoryService;
         this.sellerPayStackService = sellerPayStackService;
+        this.fcmService = fcmService;
+        this.sellerNotificationService = sellerNotificationService;
+        this.adminNotificationService = adminNotificationService;
     }
 
     @Override
-    public ResponseEntity<CustomPaymentResponse> uploadProduct(UploadProductDto uploadProductDto, MultipartFile file, HttpServletRequest request) throws Exception {
+    public ResponseEntity<CustomPaymentResponse> uploadProduct(UploadProductDto uploadProductDto, MultipartFile[] files, HttpServletRequest request) throws Exception {
 
         SellerEntity seller = sellerRepository.findByEmail(uploadProductDto.getSellerEMail());
 
         if (Objects.isNull(seller)) {
             return ResponseEntity.badRequest().body(new CustomPaymentResponse(false, "Seller Email not found", null));
         }
-        if (uploadProductDto.getPrice().intValue() <=0){
+        if (uploadProductDto.getPrice().intValue() <= 0) {
             return ResponseEntity.badRequest().body(new CustomPaymentResponse(false, "Invalid product price", null));
         }
         categoryName(uploadProductDto.getCategory());
 
-        ProductImageEntity imageEntity = productImageService.saveProductImage(file);
-        if (Objects.isNull(imageEntity)) {
-            return ResponseEntity.badRequest().body(new CustomPaymentResponse(false, "The product format not accepted", null));
-        }
-        String downloadUrl = "retrieved/" + imageEntity.getId();
-        ProductEntity product = ProductEntity.builder()
-                .productImage(downloadUrl)
-                .productName(uploadProductDto.getProductName())
-                .brand(uploadProductDto.getBrand())
-                .category(uploadProductDto.getCategory())
-                .description(uploadProductDto.getDescription())
-                .productOwner(seller)
-                .price(uploadProductDto.getPrice())
-                .status("Pending Approval")
-                .paymentStatus(PaymentStatus.PENDING.name())
-                .uploadedDate(new Date())
-                .approvedOrRejectedDate(null)
-                .updatedDate(null)
-                .build();
-        productRepository.save(product);
-        System.out.println("The product Id is "+product.getId());
-        return sellerPayStackService.initializePayment(product.getId());
+        Set<ProductImageEntity> productImageEntitySet = productImageService.uploadProduct(files);
+        Thread.sleep(3000);
+
+            ProductEntity product = ProductEntity.builder()
+                    .productName(uploadProductDto.getProductName())
+                    .brand(uploadProductDto.getBrand())
+                    .category(uploadProductDto.getCategory())
+                    .description(uploadProductDto.getDescription())
+                    .productOwner(seller)
+                    .price(uploadProductDto.getPrice())
+                    .productImages(productImageEntitySet)
+                    .status("Pending Approval")
+                    .paymentStatus(PaymentStatus.PENDING.name())
+                    .uploadedDate(new Date())
+                    .approvedOrRejectedDate(null)
+                    .updatedDate(null)
+                    .build();
+            productRepository.save(product);
+            System.out.println("The product Id is " + product.getId());
+            notifyAdminOnProductUpload(product.getProductOwner().getUsername());
+            return sellerPayStackService.initializePayment(product.getId());
     }
     @Override
-    public ProductServerResponse approveOrRejectProductByAdmin(ApprovedOrRejectProductDto approvedOrRejectProductDto, HttpServletRequest request) {
+    public ProductServerResponse approveOrRejectProductByAdmin(ApprovedOrRejectProductDto approvedOrRejectProductDto, HttpServletRequest request) throws ExecutionException, InterruptedException, DataNotFoundException {
         ProductEntity product = productRepository.findByProductId(approvedOrRejectProductDto.getProductId());
         if (Objects.isNull(product)) {
             return new ProductServerResponse(baseUrl + request.getRequestURI(), "NOT OK", new ProductResponse(406, "Product Update Info", "The product id not found", null));
@@ -101,6 +115,8 @@ public class ProductServiceImpl implements ProductService {
         product.setStatus(approvedOrRejectProductDto.getStatus());
         product.setApprovedOrRejectedDate(new Date());
         productRepository.save(product);
+        notifySellerOnProductUpdateByAdminAndSave(product.getProductOwner().getEmail());
+        //notifySellerOnProductUpdateByAdmin(product.getProductOwner().getFcmToken());
 
         return new ProductServerResponse(baseUrl + request.getRequestURI(), "OK", new ProductResponse(200, "Product Information", "Product updated Successfully",
                 ProductModelUtil.getReturnedProductModel(product)));
@@ -292,5 +308,30 @@ public class ProductServiceImpl implements ProductService {
         if (!found){
             throw new DataNotFoundException("There is no category with this name");
         }
+    }
+
+    private void notifySellerOnProductUpdateByAdmin(String deviceToken) throws ExecutionException, InterruptedException {
+        DevicesNotificationRequest devicesNotificationRequest = new DevicesNotificationRequest();
+        devicesNotificationRequest.setDeviceToken(deviceToken);
+        devicesNotificationRequest.setTitle("Product Update Notification");
+        devicesNotificationRequest.setBody("Your pending uploaded product has been updated by the admin,\ncheck your products dashboard for the update");
+        fcmService.sendNotificationToDevice(devicesNotificationRequest);
+    }
+    private void notifySellerOnProductUpdateByAdminAndSave(String sellerEmail) throws DataNotFoundException {
+        SaveNotificationDto saveNotificationDto = SaveNotificationDto.builder()
+                .title("Product upload Update")
+                .message("Your product upload has been updated by the admin,check your profile for the new update")
+                .email(sellerEmail)
+                .build();
+        sellerNotificationService.saveNotification(saveNotificationDto);
+    }
+
+    private void notifyAdminOnProductUpload(String sellerName) throws DataNotFoundException {
+        SaveNotificationDto saveNotificationDto = SaveNotificationDto.builder()
+                .title("Product upload Update")
+                .message("A product has been uploaded by "+sellerName+",check the product dashboard for approval")
+                .email("admin@gmail.com")
+                .build();
+        adminNotificationService.saveNotification(saveNotificationDto);
     }
 }

@@ -118,6 +118,7 @@ public class SellerServiceImpl implements SellerService {
                 .isVerified(false)
                 .accountStatus(AccountStatus.Active.name())
                 .phoneNumber(sellerDto.getPhoneNumber())
+                .fcmToken(sellerDto.getFcmToken())
                 .password(encryptedCustomerPassword)
                 .identificationUrl(downloadUrl)
                 .build();

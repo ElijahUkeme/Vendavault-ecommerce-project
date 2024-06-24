@@ -16,8 +16,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 public class ChatRoom {
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

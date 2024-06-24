@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req->
                         req.requestMatchers("/api/v1/auth/**",
+                                        "/notification/**",
                                         "/v2/api-docs",
                                         "/v3/api-docs",
                                         "/v3/api-docs/**",
@@ -39,12 +40,14 @@ public class SecurityConfig {
                                         "/ws/**",
                                         "/configuration/ui",
                                         "/configuration/security",
+                                        "/","/static/**", "index*", "/css/*", "/js/*",
                                         "/swagger-ui/**",
                                         "/webjars/**",
                                         "/swagger-ui.html",
                                         "/main.css/",
                                         "/index.html/",
                                         "/main.js/",
+                                        "/","/ws/**",
                                         "/confirm-account",
                                         "/download/{attachmentId}",
                                         "/return/{attachmentId}",

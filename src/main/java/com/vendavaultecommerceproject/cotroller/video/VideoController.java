@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 public class VideoController {
@@ -37,7 +38,7 @@ public class VideoController {
     }
 
     @PostMapping("/video/upload")
-    public ResponseEntity<CustomPaymentResponse> uploadVideo(@RequestParam("videoFile") MultipartFile file, @RequestPart("video") VideoDto videoDto, HttpServletRequest request) throws DataNotAcceptableException, IOException {
+    public ResponseEntity<CustomPaymentResponse> uploadVideo(@RequestParam("videoFile") MultipartFile file, @RequestPart("video") VideoDto videoDto, HttpServletRequest request) throws DataNotAcceptableException, IOException, DataNotFoundException {
         return videoService.uploadVideo(file, videoDto, request);
     }
 
@@ -53,7 +54,7 @@ public class VideoController {
 
 
     @PostMapping("/video/admin/approve")
-    public VideoServerResponse adminApproveVideo(@RequestBody AdminApproveOrRejectVideoDto approveOrRejectVideoDto,HttpServletRequest request) throws DataNotFoundException {
+    public VideoServerResponse adminApproveVideo(@RequestBody AdminApproveOrRejectVideoDto approveOrRejectVideoDto,HttpServletRequest request) throws DataNotFoundException, ExecutionException, InterruptedException {
         return videoService.approveAVideo(approveOrRejectVideoDto,request);
     }
     @GetMapping("/video/get/{videoId}")

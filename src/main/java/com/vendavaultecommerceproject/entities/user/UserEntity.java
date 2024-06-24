@@ -22,6 +22,7 @@ public class UserEntity {
     private String email;
     private String password;
     private String accountStatus;
+    private String fcmToken;
     private boolean isVerified;
     private String phoneNumber;
 

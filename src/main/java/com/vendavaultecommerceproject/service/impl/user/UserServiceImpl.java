@@ -116,6 +116,7 @@ public class UserServiceImpl implements UserService {
                     .accountStatus(AccountStatus.Active.name())
                     .phoneNumber(userDto.getPhoneNumber())
                     .identificationUrl(downloadUrl)
+                    .fcmToken(userDto.getFcmToken())
                     .build();
 
             userRepository.save(user);

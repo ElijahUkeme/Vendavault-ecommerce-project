@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Builder
 public class SellerEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,6 +24,7 @@ public class SellerEntity {
     private String businessName;
     private boolean isVerified;
     private String phoneNumber;
+    private String fcmToken;
     private String accountStatus;
     private String businessDescription;
     private String identificationUrl;

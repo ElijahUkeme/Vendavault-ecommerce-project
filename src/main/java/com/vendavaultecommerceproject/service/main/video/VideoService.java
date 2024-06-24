@@ -15,11 +15,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public interface VideoService {
 
-    public ResponseEntity<CustomPaymentResponse> uploadVideo(MultipartFile file, VideoDto videoDto, HttpServletRequest request) throws DataNotAcceptableException, IOException;
-    public VideoServerResponse approveAVideo(AdminApproveOrRejectVideoDto approveOrRejectVideoDto,HttpServletRequest request) throws DataNotFoundException;
+    public ResponseEntity<CustomPaymentResponse> uploadVideo(MultipartFile file, VideoDto videoDto, HttpServletRequest request) throws DataNotAcceptableException, IOException, DataNotFoundException;
+    public VideoServerResponse approveAVideo(AdminApproveOrRejectVideoDto approveOrRejectVideoDto,HttpServletRequest request) throws DataNotFoundException, ExecutionException, InterruptedException;
     public VideoServerResponse getAVideo(Long videoId,HttpServletRequest request) throws DataNotFoundException;
     public VideoServerListResponse getAllVideoForSeller(RetrieveUserDto retrieveUserDto,HttpServletRequest request) throws DataNotFoundException;
     public VideoServerListResponse getAllVideos(HttpServletRequest request);

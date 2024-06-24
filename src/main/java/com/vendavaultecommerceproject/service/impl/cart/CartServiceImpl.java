@@ -66,7 +66,7 @@ public class CartServiceImpl implements CartService {
         //rather than adding it again and again
         if (isUserAlreadyHasThisProductInHisCart(buyer,product)){
             return new CartServerResponse(baseUrl+request.getRequestURI(),AppStrings.statusNotOk,new CartResponse(
-                    ApiConstant.STATUS_CODE_NOT_ACCEPTED,AppStrings.cartAuthenticationHeadingMessage,AppStrings.productAuthenticationHeadingMessage,null
+                    ApiConstant.STATUS_CODE_NOT_ACCEPTED,AppStrings.cartAuthenticationHeadingMessage,AppStrings.productAlreadyAddedToCartMessage,null
             ));
         }
         CartItemEntity cartItem = CartItemEntity.builder()

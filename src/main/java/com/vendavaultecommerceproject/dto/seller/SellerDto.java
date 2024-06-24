@@ -16,5 +16,6 @@ public class SellerDto {
     private String confirmPassword;
     private String businessName;
     private String phoneNumber;
+    private String fcmToken;
     private String businessDescription;
 }

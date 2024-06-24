@@ -12,5 +12,5 @@ import java.util.List;
 @Repository
 public interface SaleRepository extends JpaRepository<SaleEntity,Long> {
 
-    List<SaleEntity> findBySeller(SellerEntity seller);
+    //List<SaleEntity> findBySeller(SellerEntity seller);
 }

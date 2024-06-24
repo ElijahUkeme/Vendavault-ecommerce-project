@@ -8,8 +8,12 @@ import com.vendavaultecommerceproject.entities.video.VideoAttachmentEntity;
 import com.vendavaultecommerceproject.entities.video.VideoEntity;
 import com.vendavaultecommerceproject.exception.exeception.DataNotAcceptableException;
 import com.vendavaultecommerceproject.exception.exeception.DataNotFoundException;
-import com.vendavaultecommerceproject.model.product.ProductModel;
 import com.vendavaultecommerceproject.model.video.VideoModel;
+import com.vendavaultecommerceproject.notification.dto.DevicesNotificationRequest;
+import com.vendavaultecommerceproject.notification.dto.SaveNotificationDto;
+import com.vendavaultecommerceproject.notification.service.main.FCMService;
+import com.vendavaultecommerceproject.notification.service.main.admin.AdminNotificationService;
+import com.vendavaultecommerceproject.notification.service.main.seller.SellerNotificationService;
 import com.vendavaultecommerceproject.payment.enums.PaymentStatus;
 import com.vendavaultecommerceproject.payment.response.common.CustomPaymentResponse;
 import com.vendavaultecommerceproject.payment.service.video.VideoPaymentService;
@@ -32,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 
 @Service
@@ -41,18 +46,24 @@ public class VideoServiceImpl implements VideoService {
     private final VideoAttachmentService videoAttachmentService;
     private final VideoPaymentService videoPaymentService;
     private final SellerRepository sellerRepository;
+    private final FCMService fcmService;
+    private final SellerNotificationService sellerNotificationService;
+    private final AdminNotificationService adminNotificationService;
     @Value("${baseUrl}")
     private String baseUrl;
 
-    public VideoServiceImpl(VideoRepository videoRepository, VideoAttachmentService videoAttachmentService, VideoPaymentService videoPaymentService, SellerRepository sellerRepository) {
+    public VideoServiceImpl(VideoRepository videoRepository, VideoAttachmentService videoAttachmentService, VideoPaymentService videoPaymentService, SellerRepository sellerRepository, FCMService fcmService, SellerNotificationService sellerNotificationService, AdminNotificationService adminNotificationService) {
         this.videoRepository = videoRepository;
         this.videoAttachmentService = videoAttachmentService;
         this.videoPaymentService = videoPaymentService;
         this.sellerRepository = sellerRepository;
+        this.fcmService = fcmService;
+        this.sellerNotificationService = sellerNotificationService;
+        this.adminNotificationService = adminNotificationService;
     }
 
     @Override
-    public ResponseEntity<CustomPaymentResponse> uploadVideo(MultipartFile file, VideoDto videoDto, HttpServletRequest request) throws DataNotAcceptableException, IOException {
+    public ResponseEntity<CustomPaymentResponse> uploadVideo(MultipartFile file, VideoDto videoDto, HttpServletRequest request) throws DataNotAcceptableException, IOException, DataNotFoundException {
         VideoAttachmentEntity videoAttachment = videoAttachmentService.saveVideoAttachment(file);
         SellerEntity seller = sellerRepository.findByEmail(videoDto.getSellerEmail());
 
@@ -73,12 +84,13 @@ public class VideoServiceImpl implements VideoService {
                 .build();
         videoRepository.save(video);
         System.out.println("The video Id is "+video.getId());
+        notifyAdminOnVideoUpload(seller.getUsername());
         return videoPaymentService.initializePayment(video.getId());
 
     }
 
     @Override
-    public VideoServerResponse approveAVideo(AdminApproveOrRejectVideoDto approveOrRejectVideoDto, HttpServletRequest request) throws DataNotFoundException {
+    public VideoServerResponse approveAVideo(AdminApproveOrRejectVideoDto approveOrRejectVideoDto, HttpServletRequest request) throws DataNotFoundException, ExecutionException, InterruptedException {
         Optional<VideoEntity> video = videoRepository.findById(approveOrRejectVideoDto.getVideoId());
         if (video.isEmpty()){
             throw new DataNotFoundException("Video Id not found");
@@ -86,6 +98,8 @@ public class VideoServiceImpl implements VideoService {
         video.get().setStatus(approveOrRejectVideoDto.getStatus());
         video.get().setApprovedDate(new Date());
         videoRepository.save(video.get());
+        notifySellerOnVideoUpdateByAdminAndSave(video.get().getSeller().getEmail());
+        //notifySellerVideoUpdateByAdmin(video.get().getSeller().getFcmToken());
         return new VideoServerResponse(baseUrl+request.getRequestURI(), AppStrings.statusOk,
                 new VideoResponse(ApiConstant.STATUS_CODE_OK,"Video Approval","Video Approved Successfully",
                         VideoModelUtil.getReturnedVideoModel(video.get())));
@@ -150,5 +164,31 @@ public class VideoServiceImpl implements VideoService {
         }
         return videoModels;
 
+    }
+
+    private void notifySellerVideoUpdateByAdmin(String deviceToken) throws ExecutionException, InterruptedException {
+        DevicesNotificationRequest devicesNotificationRequest = new DevicesNotificationRequest();
+        devicesNotificationRequest.setDeviceToken(deviceToken);
+        devicesNotificationRequest.setTitle("Video Update Notification");
+        devicesNotificationRequest.setBody("Your pending uploaded Video has been updated by the admin,\ncheck your video dashboard for the update");
+        fcmService.sendNotificationToDevice(devicesNotificationRequest);
+    }
+
+    private void notifySellerOnVideoUpdateByAdminAndSave(String sellerEmail) throws DataNotFoundException {
+        SaveNotificationDto saveNotificationDto = SaveNotificationDto.builder()
+                .title("Video upload Update")
+                .message("Your video upload has been updated by the admin,check your profile for the new update")
+                .email(sellerEmail)
+                .build();
+        sellerNotificationService.saveNotification(saveNotificationDto);
+    }
+
+    private void notifyAdminOnVideoUpload(String sellerName) throws DataNotFoundException {
+        SaveNotificationDto saveNotificationDto = SaveNotificationDto.builder()
+                .title("Video upload Update")
+                .message("A video has been uploaded by "+sellerName+",check the video dashboard for approval")
+                .email("admin@gmail.com")
+                .build();
+        adminNotificationService.saveNotification(saveNotificationDto);
     }
 }

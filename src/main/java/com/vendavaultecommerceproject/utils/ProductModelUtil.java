@@ -9,7 +9,6 @@ public class ProductModelUtil {
 
         ProductModel productModel = ProductModel.builder()
                 .id(product.getId())
-                .productImage(product.getProductImage())
                 .productName(product.getProductName())
                 .brand(product.getBrand())
                 .sellerModel(SellerModelUtil.getReturnedSeller(product.getProductOwner()))
@@ -21,6 +20,7 @@ public class ProductModelUtil {
                 .updatedDate(product.getUpdatedDate())
                 .uploadedDate(product.getUploadedDate())
                 .price(product.getPrice())
+                .productImages(ProductImageModelUtil.getReturnedProductImageModel(product.getProductImages()))
                 .build();
 
         return productModel;

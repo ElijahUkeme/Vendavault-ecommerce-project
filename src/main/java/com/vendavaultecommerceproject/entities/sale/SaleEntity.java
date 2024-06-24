@@ -27,8 +27,6 @@ public class SaleEntity {
     private Long id;
     private String status;
     private String paymentType;
-    @ManyToOne
-    private SellerEntity seller;
     private String deliveredPersonName;
     private String deliveredAddress;
     private String deliveredPhone;
