@@ -4,6 +4,7 @@ import com.vendavaultecommerceproject.dto.user.UpdateUserInfoDto;
 import com.vendavaultecommerceproject.dto.user.UserDto;
 import com.vendavaultecommerceproject.dto.user.SignInDto;
 import com.vendavaultecommerceproject.entities.attachment.AttachmentEntity;
+import com.vendavaultecommerceproject.entities.user.UserEntity;
 import com.vendavaultecommerceproject.exception.exeception.DataNotFoundException;
 import com.vendavaultecommerceproject.response.user.ServerResponse;
 import com.vendavaultecommerceproject.service.main.attachment.AttachmentService;
@@ -64,5 +65,10 @@ public class UserController {
     @PostMapping("/user/info/update")
     public ServerResponse updateUserInfo(@RequestBody UpdateUserInfoDto userInfoDto,HttpServletRequest request){
         return userService.updateUserInfo(userInfoDto,request);
+    }
+
+    @GetMapping("/user/get-by-email")
+    public UserEntity getUserByEmail(@RequestParam("email")String email){
+        return userService.findUserByEmail(email);
     }
 }

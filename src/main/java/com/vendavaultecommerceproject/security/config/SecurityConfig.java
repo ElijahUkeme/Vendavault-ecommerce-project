@@ -38,6 +38,7 @@ public class SecurityConfig {
                                         "/swagger-resources",
                                         "/swagger-resources/**",
                                         "/ws/**",
+                                        "/admin/monthly-sale-report",
                                         "/configuration/ui",
                                         "/configuration/security",
                                         "/","/static/**", "index*", "/css/*", "/js/*",

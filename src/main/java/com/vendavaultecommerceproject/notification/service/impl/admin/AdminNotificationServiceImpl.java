@@ -1,18 +1,14 @@
 package com.vendavaultecommerceproject.notification.service.impl.admin;
 
 
-import com.vendavaultecommerceproject.admin.entity.AdminRegistrationEntity;
-import com.vendavaultecommerceproject.admin.service.main.AdminRegistrationService;
+import com.vendavaultecommerceproject.admin.auth.entity.AdminRegistrationEntity;
+import com.vendavaultecommerceproject.admin.auth.service.main.AdminRegistrationService;
 import com.vendavaultecommerceproject.dto.user.RetrieveUserDto;
-import com.vendavaultecommerceproject.entities.user.UserEntity;
 import com.vendavaultecommerceproject.exception.exeception.DataNotFoundException;
 import com.vendavaultecommerceproject.notification.dto.SaveNotificationDto;
 import com.vendavaultecommerceproject.notification.entity.admin.AdminNotificationEntity;
-import com.vendavaultecommerceproject.notification.entity.user.UserNotificationEntity;
-import com.vendavaultecommerceproject.notification.model.user.UserNotificationModel;
 import com.vendavaultecommerceproject.notification.repository.admin.AdminNotificationRepository;
 import com.vendavaultecommerceproject.notification.service.main.admin.AdminNotificationService;
-import com.vendavaultecommerceproject.utils.UserNotificationModelUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

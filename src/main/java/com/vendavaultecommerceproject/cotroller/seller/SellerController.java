@@ -5,6 +5,8 @@ import com.vendavaultecommerceproject.dto.seller.SellerDto;
 import com.vendavaultecommerceproject.dto.seller.SellerUpdateDto;
 import com.vendavaultecommerceproject.dto.user.SignInDto;
 import com.vendavaultecommerceproject.entities.attachment.AttachmentEntity;
+import com.vendavaultecommerceproject.entities.seller.SellerEntity;
+import com.vendavaultecommerceproject.entities.user.UserEntity;
 import com.vendavaultecommerceproject.exception.exeception.DataNotFoundException;
 import com.vendavaultecommerceproject.response.seller.SellerServerResponse;
 import com.vendavaultecommerceproject.service.main.attachment.AttachmentService;
@@ -43,6 +45,11 @@ public class SellerController {
                         +"\"")
                 .body(new ByteArrayResource(attachment.getData()));
 
+    }
+
+    @GetMapping("/seller/get-by-email")
+    public SellerEntity getSellerByEmail(@RequestParam("email")String email){
+        return service.findSellerByEmail(email);
     }
     @PostMapping("/seller/login")
     public SellerServerResponse signInSeller(@RequestBody SignInDto signInDto, HttpServletRequest request) throws NoSuchAlgorithmException {

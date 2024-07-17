@@ -13,6 +13,7 @@ public class SellerModelUtil {
         sellerModel.setUsername(seller.getUsername());
         sellerModel.setBusinessName(seller.getBusinessName());
         sellerModel.setIdentificationUrl(seller.getIdentificationUrl());
+        sellerModel.setCreatedDate(seller.getCreatedDate());
         sellerModel.setPhoneNumber(seller.getPhoneNumber());
         sellerModel.setBusinessDescription(seller.getBusinessDescription());
         sellerModel.setVerified(seller.isVerified());

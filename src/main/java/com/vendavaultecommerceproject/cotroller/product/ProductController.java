@@ -101,4 +101,39 @@ public class ProductController {
                                                                                 @RequestParam(defaultValue = AppConstants.SORT_ORDER,required = false)String sortDirection){
         return ResponseEntity.ok(productService.getAllProductWithPaginationAndSorting(pageNumber,pageSize,sortBy,sortDirection));
     }
+
+    @GetMapping("/products/all/pending-with-sorting")
+    public ResponseEntity<ProductPageResponse> getAllPendingProductWithPaginationAndSorting(@RequestParam(defaultValue = AppConstants.PAGE_NUMBER,required = false)Integer pageNumber,
+                                                                                @RequestParam(defaultValue = AppConstants.PAGE_SIZE,required = false)Integer pageSize,
+                                                                                @RequestParam(defaultValue = AppConstants.SORT_BY,required = false)String sortBy,
+                                                                                @RequestParam(defaultValue = AppConstants.SORT_ORDER,required = false)String sortDirection){
+        return ResponseEntity.ok(productService.getAllPendingProductWithPaginationAndSorting(pageNumber,pageSize,sortBy,sortDirection));
+    }
+
+    @GetMapping("/products/all/approved/for/seller-with-sorting")
+    public ResponseEntity<ProductPageResponse> getAllApprovedProductForTheSellerWithPaginationAndSorting(@RequestParam(defaultValue = AppConstants.PAGE_NUMBER,required = false)Integer pageNumber,
+                                                                                            @RequestParam(defaultValue = AppConstants.PAGE_SIZE,required = false)Integer pageSize,
+                                                                                            @RequestParam(defaultValue = AppConstants.SORT_BY,required = false)String sortBy,
+                                                                                            @RequestParam(defaultValue = AppConstants.SORT_ORDER,required = false)String sortDirection,
+                                                                                                         @RequestParam("sellerEmail")String sellerEmail) throws DataNotFoundException {
+        return ResponseEntity.ok(productService.getAllApprovedProductForTheSellerWithPaginationAndSorting(pageNumber,pageSize,sortBy,sortDirection,sellerEmail));
+    }
+
+    @GetMapping("/products/all/pending/for/seller-with-sorting")
+    public ResponseEntity<ProductPageResponse> getAllPendingProductForTheSellerWithPaginationAndSorting(@RequestParam(defaultValue = AppConstants.PAGE_NUMBER,required = false)Integer pageNumber,
+                                                                                                         @RequestParam(defaultValue = AppConstants.PAGE_SIZE,required = false)Integer pageSize,
+                                                                                                         @RequestParam(defaultValue = AppConstants.SORT_BY,required = false)String sortBy,
+                                                                                                         @RequestParam(defaultValue = AppConstants.SORT_ORDER,required = false)String sortDirection,
+                                                                                                         @RequestParam("sellerEmail")String sellerEmail) throws DataNotFoundException {
+        return ResponseEntity.ok(productService.getAllPendingProductForTheSellerWithPaginationAndSorting(pageNumber,pageSize,sortBy,sortDirection,sellerEmail));
+    }
+
+    @GetMapping("/products/all/uploaded/for/seller-with-sorting")
+    public ResponseEntity<ProductPageResponse> getAllUploadedProductForTheSellerWithPaginationAndSorting(@RequestParam(defaultValue = AppConstants.PAGE_NUMBER,required = false)Integer pageNumber,
+                                                                                                        @RequestParam(defaultValue = AppConstants.PAGE_SIZE,required = false)Integer pageSize,
+                                                                                                        @RequestParam(defaultValue = AppConstants.SORT_BY,required = false)String sortBy,
+                                                                                                        @RequestParam(defaultValue = AppConstants.SORT_ORDER,required = false)String sortDirection,
+                                                                                                        @RequestParam("sellerEmail")String sellerEmail) throws DataNotFoundException {
+        return ResponseEntity.ok(productService.getAllUploadedProductForTheSellerWithPaginationAndSorting(pageNumber,pageSize,sortBy,sortDirection,sellerEmail));
+    }
 }

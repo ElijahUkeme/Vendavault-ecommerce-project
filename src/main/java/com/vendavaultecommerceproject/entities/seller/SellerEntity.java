@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,8 +26,8 @@ public class SellerEntity {
     private String businessName;
     private boolean isVerified;
     private String phoneNumber;
-    private String fcmToken;
     private String accountStatus;
+    private LocalDate createdDate;
     private String businessDescription;
     private String identificationUrl;
     @OneToOne(mappedBy = "seller")

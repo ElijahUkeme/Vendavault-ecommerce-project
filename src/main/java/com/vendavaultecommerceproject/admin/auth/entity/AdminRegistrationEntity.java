@@ -1,4 +1,4 @@
-package com.vendavaultecommerceproject.admin.entity;
+package com.vendavaultecommerceproject.admin.auth.entity;
 
 
 import jakarta.persistence.Entity;
@@ -16,8 +16,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 public class AdminRegistrationEntity {
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

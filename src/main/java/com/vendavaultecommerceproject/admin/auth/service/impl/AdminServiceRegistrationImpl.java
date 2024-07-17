@@ -1,11 +1,11 @@
-package com.vendavaultecommerceproject.admin.service.impl;
+package com.vendavaultecommerceproject.admin.auth.service.impl;
 
 
-import com.vendavaultecommerceproject.admin.dto.AdminLoginDto;
-import com.vendavaultecommerceproject.admin.dto.AdminRegistrationDto;
-import com.vendavaultecommerceproject.admin.entity.AdminRegistrationEntity;
-import com.vendavaultecommerceproject.admin.repository.AdminRegistrationRepository;
-import com.vendavaultecommerceproject.admin.service.main.AdminRegistrationService;
+import com.vendavaultecommerceproject.admin.auth.dto.AdminLoginDto;
+import com.vendavaultecommerceproject.admin.auth.dto.AdminRegistrationDto;
+import com.vendavaultecommerceproject.admin.auth.entity.AdminRegistrationEntity;
+import com.vendavaultecommerceproject.admin.auth.repository.AdminRegistrationRepository;
+import com.vendavaultecommerceproject.admin.auth.service.main.AdminRegistrationService;
 import com.vendavaultecommerceproject.exception.exeception.DataNotAcceptableException;
 import com.vendavaultecommerceproject.exception.exeception.DataNotFoundException;
 import com.vendavaultecommerceproject.util.Utility;

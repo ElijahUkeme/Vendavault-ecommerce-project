@@ -1,4 +1,4 @@
-package com.vendavaultecommerceproject.admin.dto;
+package com.vendavaultecommerceproject.admin.auth.dto;
 
 
 import lombok.AllArgsConstructor;

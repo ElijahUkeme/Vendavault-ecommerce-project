@@ -10,6 +10,7 @@ import com.vendavaultecommerceproject.entities.seller.SellerEntity;
 import com.vendavaultecommerceproject.entities.token.SellerAuthenticationTokenEntity;
 import com.vendavaultecommerceproject.exception.exeception.DataNotFoundException;
 import com.vendavaultecommerceproject.model.email.EmailDetails;
+import com.vendavaultecommerceproject.model.seller.SellerModel;
 import com.vendavaultecommerceproject.repository.seller.SellerRepository;
 import com.vendavaultecommerceproject.response.seller.SellerResponse;
 import com.vendavaultecommerceproject.response.seller.SellerServerResponse;
@@ -28,6 +29,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -118,7 +121,7 @@ public class SellerServiceImpl implements SellerService {
                 .isVerified(false)
                 .accountStatus(AccountStatus.Active.name())
                 .phoneNumber(sellerDto.getPhoneNumber())
-                .fcmToken(sellerDto.getFcmToken())
+                .createdDate(LocalDate.now())
                 .password(encryptedCustomerPassword)
                 .identificationUrl(downloadUrl)
                 .build();
@@ -163,6 +166,8 @@ public class SellerServiceImpl implements SellerService {
                 200, "Seller Authentication", "Seller Found", SellerModelUtil.getReturnedSeller(seller)
         ));
     }
+
+
     @Override
     public SellerEntity findSellerByEmail(String email) {
         SellerEntity seller = sellerRepository.findByEmail(email);

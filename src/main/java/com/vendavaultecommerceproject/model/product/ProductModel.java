@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Set;
 
@@ -29,9 +30,11 @@ public class ProductModel {
     private String description;
     private String status;
     private String paymentStatus;
-    private Date uploadedDate;
+    private LocalDate uploadedDate;
+    private Date uploadedTime;
+    private Date updatedTime;
     private Date approvedOrRejectedDate;
-    private Date updatedDate;
+    private LocalDate updatedDate;
     private Set<ProductImageModel> productImages;
     private SellerModel sellerModel;
 

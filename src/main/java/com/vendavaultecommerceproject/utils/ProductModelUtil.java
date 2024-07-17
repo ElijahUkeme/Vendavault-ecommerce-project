@@ -19,6 +19,8 @@ public class ProductModelUtil {
                 .paymentStatus(product.getPaymentStatus())
                 .updatedDate(product.getUpdatedDate())
                 .uploadedDate(product.getUploadedDate())
+                .uploadedTime(product.getUploadedTime())
+                .uploadedDate(product.getUploadedDate())
                 .price(product.getPrice())
                 .productImages(ProductImageModelUtil.getReturnedProductImageModel(product.getProductImages()))
                 .build();

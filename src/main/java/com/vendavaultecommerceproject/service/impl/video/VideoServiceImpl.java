@@ -35,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -79,6 +80,7 @@ public class VideoServiceImpl implements VideoService {
                 .videoUrl(videoUrl)
                 .title(videoDto.getTitle())
                 .status("Pending Approval")
+                .uploadedDate(LocalDate.now())
                 .paymentStatus(PaymentStatus.PENDING.name())
                 .seller(seller)
                 .build();

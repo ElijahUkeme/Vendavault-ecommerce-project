@@ -1,6 +1,8 @@
 package com.vendavaultecommerceproject.entities.sale;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.google.api.client.util.DateTime;
 import com.vendavaultecommerceproject.entities.cart.CartItemEntity;
 import com.vendavaultecommerceproject.entities.order.OrderTokenEntity;
 import com.vendavaultecommerceproject.entities.product.entity.ProductEntity;
@@ -11,8 +13,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -34,7 +38,11 @@ public class SaleEntity {
     @ManyToOne
     private UserEntity buyer;
     private double totalPrice;
-    private Date datePurchased;
+    private LocalDate datePurchased;
+    @Temporal(TemporalType.TIME)
+    @DateTimeFormat(style = "hh:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "hh:mm")
+    private Date timePurchased;
     @OneToMany
     private List<CartItemEntity> cartItemList;
 }

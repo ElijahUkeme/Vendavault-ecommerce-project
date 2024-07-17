@@ -40,6 +40,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -83,6 +84,15 @@ public class SaleServiceImpl implements SaleService {
     }
 
     @Override
+    public SaleEntity getSaleByOrderId(Long orderId) throws DataNotFoundException {
+        if (Objects.isNull(saleRepository.findById(orderId))){
+            throw new DataNotFoundException("Order Id not found");
+        }
+        SaleEntity order = saleRepository.findById(orderId).get();
+        return order;
+    }
+
+    @Override
     public ResponseEntity<CustomPaymentResponse> saleProduct(SaleDto saleDto) throws DataNotFoundException, ExecutionException, InterruptedException {
         UserEntity buyer = userService.findUserByEmail(saleDto.getBuyerEmail());
         if (Objects.isNull(buyer)){
@@ -95,7 +105,8 @@ public class SaleServiceImpl implements SaleService {
         SaleEntity sale = SaleEntity.builder()
                 .status("Pending Delivery")
                 .paymentType(saleDto.getPaymentType())
-                .datePurchased(new Date())
+                .datePurchased(LocalDate.now())
+                .timePurchased(new Date())
                 .deliveredPersonName(saleDto.getDeliveredPersonName())
                 .buyer(buyer)
                 .paymentStatus("Pending")
@@ -201,6 +212,7 @@ public class SaleServiceImpl implements SaleService {
                             .orderId(sale.getId())
                             .deliveredPersonPhone(sale.getDeliveredPhone())
                             .orderedDate(sale.getDatePurchased())
+                            .orderedTime(sale.getTimePurchased())
                             .deliveredPersonAddress(sale.getDeliveredAddress())
                             .deliveredPersonName(sale.getDeliveredPersonName())
                             .totalAmount(amount)
@@ -280,7 +292,8 @@ public class SaleServiceImpl implements SaleService {
         }
         NotificationModel notificationModel = NotificationModel.builder()
                 .orderId(orderId)
-                .orderedDate(new Date())
+                .orderedDate(LocalDate.now())
+                .orderedTime(new Date())
                 .deliveredPersonAddress(saleDto.getDeliveredAddress())
                 .deliveredPersonPhone(saleDto.getDeliveredPhone())
                 .deliveredPersonName(saleDto.getDeliveredPersonName())
@@ -304,7 +317,7 @@ public class SaleServiceImpl implements SaleService {
             sellerEntities.add(cartItem.getSeller());
         }
         for (SellerEntity seller: sellerEntities){
-            notifySellers(seller.getFcmToken());
+            //notifySellers(seller.getFcmToken());
         }
     }
     private void notifySellers(String deviceToken) throws ExecutionException, InterruptedException {

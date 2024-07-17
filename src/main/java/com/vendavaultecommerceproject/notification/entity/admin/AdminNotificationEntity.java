@@ -1,7 +1,7 @@
 package com.vendavaultecommerceproject.notification.entity.admin;
 
 
-import com.vendavaultecommerceproject.admin.entity.AdminRegistrationEntity;
+import com.vendavaultecommerceproject.admin.auth.entity.AdminRegistrationEntity;
 import com.vendavaultecommerceproject.entities.user.UserEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

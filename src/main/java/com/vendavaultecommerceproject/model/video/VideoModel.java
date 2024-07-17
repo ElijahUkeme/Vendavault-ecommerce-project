@@ -10,6 +10,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.util.Date;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -21,6 +24,8 @@ public class VideoModel {
     private String videoUrl;
     private String paymentStatus;
     private String status;
+    private LocalDate uploadedDate;
+    private Date approvedDate;
 
     private SellerModel sellerModel;
 }

@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import java.time.LocalDate;
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -22,9 +24,9 @@ public class UserEntity {
     private String email;
     private String password;
     private String accountStatus;
-    private String fcmToken;
     private boolean isVerified;
     private String phoneNumber;
+    private LocalDate createdDate;
 
     private String identificationUrl;
 

@@ -1,10 +1,10 @@
-package com.vendavaultecommerceproject.admin.controller;
+package com.vendavaultecommerceproject.admin.auth.controller;
 
 
-import com.vendavaultecommerceproject.admin.dto.AdminLoginDto;
-import com.vendavaultecommerceproject.admin.dto.AdminRegistrationDto;
-import com.vendavaultecommerceproject.admin.entity.AdminRegistrationEntity;
-import com.vendavaultecommerceproject.admin.service.main.AdminRegistrationService;
+import com.vendavaultecommerceproject.admin.auth.dto.AdminLoginDto;
+import com.vendavaultecommerceproject.admin.auth.dto.AdminRegistrationDto;
+import com.vendavaultecommerceproject.admin.auth.entity.AdminRegistrationEntity;
+import com.vendavaultecommerceproject.admin.auth.service.main.AdminRegistrationService;
 import com.vendavaultecommerceproject.exception.exeception.DataNotAcceptableException;
 import com.vendavaultecommerceproject.exception.exeception.DataNotFoundException;
 import lombok.RequiredArgsConstructor;

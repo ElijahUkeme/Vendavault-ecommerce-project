@@ -1,9 +1,7 @@
 package com.vendavaultecommerceproject.notification.repository.admin;
 
-import com.vendavaultecommerceproject.admin.entity.AdminRegistrationEntity;
-import com.vendavaultecommerceproject.entities.user.UserEntity;
+import com.vendavaultecommerceproject.admin.auth.entity.AdminRegistrationEntity;
 import com.vendavaultecommerceproject.notification.entity.admin.AdminNotificationEntity;
-import com.vendavaultecommerceproject.notification.entity.user.UserNotificationEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

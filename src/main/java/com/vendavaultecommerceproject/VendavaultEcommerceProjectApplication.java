@@ -1,6 +1,7 @@
 package com.vendavaultecommerceproject;
 
 import com.vendavaultecommerceproject.security.entity.Role;
+import com.vendavaultecommerceproject.security.repository.AppUserRepository;
 import com.vendavaultecommerceproject.security.repository.RoleRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -8,6 +9,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableAsync;
+
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.format.DateTimeFormatter;
 
 
 @SpringBootApplication
@@ -27,5 +32,9 @@ public class VendavaultEcommerceProjectApplication {
 						.build());
 			}
 		};
+
+
+
 }
-}
+
+	}

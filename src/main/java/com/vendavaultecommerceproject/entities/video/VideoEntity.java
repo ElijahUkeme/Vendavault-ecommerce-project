@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -17,8 +18,6 @@ import java.util.Date;
 @Builder
 @Entity
 public class VideoEntity {
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,7 +26,7 @@ public class VideoEntity {
     private String status;
     private String paymentStatus;
     private Date approvedDate;
-
+    private LocalDate uploadedDate;
     @ManyToOne(targetEntity = SellerEntity.class)
     @JoinColumn(nullable = false,name = "seller_id")
     private SellerEntity seller;

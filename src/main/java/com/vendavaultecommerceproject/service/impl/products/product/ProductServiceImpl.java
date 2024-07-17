@@ -1,7 +1,6 @@
 package com.vendavaultecommerceproject.service.impl.products.product;
 
 
-import com.vendavaultecommerceproject.admin.service.main.AdminRegistrationService;
 import com.vendavaultecommerceproject.dto.product.ApprovedOrRejectProductDto;
 import com.vendavaultecommerceproject.dto.product.UpdateProductDto;
 import com.vendavaultecommerceproject.dto.product.UploadProductDto;
@@ -42,6 +41,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -50,7 +50,7 @@ import java.util.concurrent.ExecutionException;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
-    private SellerRepository sellerRepository;
+    private final SellerRepository sellerRepository;
     private final ProductImageService productImageService;
     private final CategoryService categoryService;
     private final SellerPayStackService sellerPayStackService;
@@ -97,7 +97,9 @@ public class ProductServiceImpl implements ProductService {
                     .productImages(productImageEntitySet)
                     .status("Pending Approval")
                     .paymentStatus(PaymentStatus.PENDING.name())
-                    .uploadedDate(new Date())
+                    .uploadedDate(LocalDate.now())
+                    .uploadedTime(new Date())
+                    .approvedOrRejectedDate(new Date())
                     .approvedOrRejectedDate(null)
                     .updatedDate(null)
                     .build();
@@ -142,7 +144,8 @@ public class ProductServiceImpl implements ProductService {
         if (Objects.nonNull(updateProductDto.getCategory())) {
             product.setCategory(updateProductDto.getCategory());
         }
-        product.setUpdatedDate(new Date());
+        product.setUpdatedDate(LocalDate.now());
+        product.setUpdatedTime(new Date());
         productRepository.save(product);
         return new ProductServerResponse(baseUrl + request.getRequestURI(), "OK", new ProductResponse(200, "Product Information", "Product updated Successfully",
                 ProductModelUtil.getReturnedProductModel(product)));
@@ -203,6 +206,95 @@ public class ProductServiceImpl implements ProductService {
         }
         return new ProductPageResponse(
                 productModels, pageNumber, pageSize, productPage.getTotalPages(), (int) productPage.getTotalElements(), productPage.isLast()
+        );
+    }
+
+    @Override
+    public ProductPageResponse getAllPendingProductWithPaginationAndSorting(Integer pageNumber, Integer pageSize, String sortBy, String sortDirection) {
+
+        Sort sort = sortDirection.equalsIgnoreCase("asc")? Sort.by(sortBy).ascending()
+                :Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize,sort);
+        Page<ProductEntity> productPage = productRepository.findAll(pageable);
+
+        //Only display product whose status is pending
+        //This is only for the admin
+        //Admin will then decide either to approve the product or reject it
+        List<ProductModel> productModels = new ArrayList<>();
+        for (ProductEntity product:productPage){
+            if (product.getStatus().equalsIgnoreCase("Pending")){
+                productModels.add(ProductModelUtil.getReturnedProductModel(product));
+            }
+        }
+        return new ProductPageResponse(
+                productModels, pageNumber, pageSize, productPage.getTotalPages(), (int) productPage.getTotalElements(), productPage.isLast()
+        );
+    }
+
+    @Override
+    public ProductPageResponse getAllApprovedProductForTheSellerWithPaginationAndSorting(Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, String sellerEmail) throws DataNotFoundException {
+        SellerEntity seller = sellerRepository.findByEmail(sellerEmail);
+        if (Objects.isNull(seller)){
+            throw new DataNotFoundException("Seller Email not found");
+        }
+        Sort sort = sortDirection.equalsIgnoreCase("asc")? Sort.by(sortBy).ascending()
+                :Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize,sort);
+        Page<ProductEntity> productEntities = productRepository.getAllProductForTheSellerWithPagination(seller,pageable);
+        List<ProductModel> approvedProduct = new ArrayList<>();
+        for (ProductEntity product: productEntities){
+            if (product.getStatus().equalsIgnoreCase("Approved")){
+                approvedProduct.add(ProductModelUtil.getReturnedProductModel(product));
+            }
+        }
+        return new ProductPageResponse(
+                approvedProduct, pageNumber, pageSize, productEntities.getTotalPages(), (int) productEntities.getTotalElements(), productEntities.isLast()
+        );
+    }
+
+    @Override
+    public ProductPageResponse getAllPendingProductForTheSellerWithPaginationAndSorting(Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, String sellerEmail) throws DataNotFoundException {
+        SellerEntity seller = sellerRepository.findByEmail(sellerEmail);
+        if (Objects.isNull(seller)){
+            throw new DataNotFoundException("Seller Email not found");
+        }
+        Sort sort = sortDirection.equalsIgnoreCase("asc")? Sort.by(sortBy).ascending()
+                :Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize,sort);
+        Page<ProductEntity> productEntities = productRepository.getAllProductForTheSellerWithPagination(seller,pageable);
+        List<ProductModel> approvedProduct = new ArrayList<>();
+        for (ProductEntity product: productEntities){
+            if (product.getStatus().equalsIgnoreCase("Pending")){
+                approvedProduct.add(ProductModelUtil.getReturnedProductModel(product));
+            }
+        }
+        return new ProductPageResponse(
+                approvedProduct, pageNumber, pageSize, productEntities.getTotalPages(), (int) productEntities.getTotalElements(), productEntities.isLast()
+        );
+    }
+
+    @Override
+    public ProductPageResponse getAllUploadedProductForTheSellerWithPaginationAndSorting(Integer pageNumber, Integer pageSize, String sortBy, String sortDirection, String sellerEmail) throws DataNotFoundException {
+        SellerEntity seller = sellerRepository.findByEmail(sellerEmail);
+        if (Objects.isNull(seller)){
+            throw new DataNotFoundException("Seller Email not found");
+        }
+        Sort sort = sortDirection.equalsIgnoreCase("asc")? Sort.by(sortBy).ascending()
+                :Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize,sort);
+        Page<ProductEntity> productEntities = productRepository.getAllProductForTheSellerWithPagination(seller,pageable);
+        List<ProductModel> approvedProduct = new ArrayList<>();
+        for (ProductEntity product: productEntities){
+
+                approvedProduct.add(ProductModelUtil.getReturnedProductModel(product));
+
+        }
+        return new ProductPageResponse(
+                approvedProduct, pageNumber, pageSize, productEntities.getTotalPages(), (int) productEntities.getTotalElements(), productEntities.isLast()
         );
     }
 

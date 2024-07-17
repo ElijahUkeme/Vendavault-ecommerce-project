@@ -15,6 +15,7 @@ public class UserModelUtil{
         usermodel.setName(user.getName());
         usermodel.setIdentificationUrl(user.getIdentificationUrl());
         usermodel.setPhoneNumber(user.getPhoneNumber());
+        usermodel.setCreatedDate(user.getCreatedDate());
 
         return  usermodel;
 

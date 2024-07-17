@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,5 +20,6 @@ public class SellerModel {
     private boolean isVerified;
     private String phoneNumber;
     private String businessDescription;
+    private LocalDate createdDate;
     private String identificationUrl;
 }

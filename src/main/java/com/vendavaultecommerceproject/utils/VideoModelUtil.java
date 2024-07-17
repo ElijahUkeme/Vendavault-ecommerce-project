@@ -14,6 +14,8 @@ public class VideoModelUtil {
                 .status(video.getStatus())
                 .paymentStatus(video.getPaymentStatus())
                 .sellerModel(VideoModelUtil.getReturnedVideoModel(video).getSellerModel())
+                .uploadedDate(video.getUploadedDate())
+                .approvedDate(video.getApprovedDate())
                 .build();
         return videoModel;
     }

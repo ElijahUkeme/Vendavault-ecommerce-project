@@ -24,6 +24,8 @@ public class SaleModelUtil {
                 .datePurchased(sale.getDatePurchased())
                 .paymentType(sale.getPaymentType())
                 .cartModels(cartModels)
+                .datePurchased(sale.getDatePurchased())
+                .timePurchased(sale.getTimePurchased())
                 .deliveredPersonName(sale.getDeliveredPersonName())
                 .status(sale.getStatus())
                 .totalPrice(BigDecimal.valueOf(sale.getTotalPrice()))

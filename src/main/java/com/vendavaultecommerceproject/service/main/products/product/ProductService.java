@@ -25,6 +25,10 @@ public interface ProductService {
     //String updateProductAfterSale(UpdateProductAfterSaleDto updateProductAfterSaleDto, HttpServletRequest request);
     ProductPageResponse getAllProductWithPagination(Integer pageNumber,Integer pageSize);
     ProductPageResponse getAllProductWithPaginationAndSorting(Integer pageNumber,Integer pageSize,String sortBy, String sortDirection);
+    ProductPageResponse getAllPendingProductWithPaginationAndSorting(Integer pageNumber,Integer pageSize,String sortBy, String sortDirection);
+    ProductPageResponse getAllApprovedProductForTheSellerWithPaginationAndSorting(Integer pageNumber,Integer pageSize,String sortBy, String sortDirection, String sellerEmail) throws DataNotFoundException;
+    ProductPageResponse getAllPendingProductForTheSellerWithPaginationAndSorting(Integer pageNumber,Integer pageSize,String sortBy, String sortDirection, String sellerEmail) throws DataNotFoundException;
+    ProductPageResponse getAllUploadedProductForTheSellerWithPaginationAndSorting(Integer pageNumber,Integer pageSize,String sortBy, String sortDirection, String sellerEmail) throws DataNotFoundException;
     ProductServerListResponse getAllApprovedProductForTheSeller(RetrieveUserDto retrieveUserDto, HttpServletRequest request);
     ProductServerListResponse getAllPendingProductForTheSeller(RetrieveUserDto retrieveUserDto,HttpServletRequest request);
     ProductServerListResponse getAllUploadedProductForTheSeller(RetrieveUserDto retrieveUserDto,HttpServletRequest request);

@@ -6,12 +6,14 @@ import com.vendavaultecommerceproject.dto.seller.SellerUpdateDto;
 import com.vendavaultecommerceproject.dto.user.SignInDto;
 import com.vendavaultecommerceproject.entities.seller.SellerEntity;
 import com.vendavaultecommerceproject.exception.exeception.DataNotFoundException;
+import com.vendavaultecommerceproject.model.seller.SellerModel;
 import com.vendavaultecommerceproject.response.seller.SellerServerResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 public interface SellerService {
 

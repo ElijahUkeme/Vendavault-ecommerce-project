@@ -26,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.util.Objects;
 
 
@@ -115,8 +116,8 @@ public class UserServiceImpl implements UserService {
                     .identificationUrl(downloadUrl)
                     .accountStatus(AccountStatus.Active.name())
                     .phoneNumber(userDto.getPhoneNumber())
+                    .createdDate(LocalDate.now())
                     .identificationUrl(downloadUrl)
-                    .fcmToken(userDto.getFcmToken())
                     .build();
 
             userRepository.save(user);

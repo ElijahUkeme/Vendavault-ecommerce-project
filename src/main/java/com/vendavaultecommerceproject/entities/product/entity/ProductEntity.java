@@ -1,6 +1,7 @@
 package com.vendavaultecommerceproject.entities.product.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.vendavaultecommerceproject.entities.product.image.ProductImageEntity;
 import com.vendavaultecommerceproject.entities.seller.SellerEntity;
 import com.vendavaultecommerceproject.entities.user.UserEntity;
@@ -9,8 +10,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.Set;
 
@@ -20,8 +23,6 @@ import java.util.Set;
 @Entity
 @Builder
 public class ProductEntity {
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,9 +32,19 @@ public class ProductEntity {
     private BigDecimal price;
     private String description;
     private String status;
-    private Date uploadedDate;
+
+    @Temporal(TemporalType.TIME)
+    @DateTimeFormat(style = "hh:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "hh:mm")
+    private Date uploadedTime;
+    private LocalDate uploadedDate;
     private Date approvedOrRejectedDate;
-    private Date updatedDate;
+
+    @Temporal(TemporalType.TIME)
+    @DateTimeFormat(style = "hh:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "hh:mm")
+    private Date updatedTime;
+    private LocalDate updatedDate;
     private String paymentStatus;
 
     @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
