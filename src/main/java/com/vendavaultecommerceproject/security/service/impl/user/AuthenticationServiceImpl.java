@@ -50,6 +50,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public String saveUser(RegistrationRequest request) throws MessagingException, DataNotAcceptableException, DataAlreadyExistException, DataNotFoundException {
+            //I have create one MANAGER role in the command line
+            //So that it will assign it to the user during registration
+            //This should be removed later in the app
 
             if (Objects.isNull(repository.findByName("MANAGER"))){
                 throw new DataNotFoundException("Role USER not found");

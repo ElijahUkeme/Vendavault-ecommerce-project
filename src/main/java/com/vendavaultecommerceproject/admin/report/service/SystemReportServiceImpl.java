@@ -1,6 +1,7 @@
 package com.vendavaultecommerceproject.admin.report.service;
 
 
+import com.vendavaultecommerceproject.admin.report.dto.MonthlyReportDto;
 import com.vendavaultecommerceproject.admin.report.model.OrderReportModel;
 import com.vendavaultecommerceproject.admin.report.model.SystemReportModel;
 import com.vendavaultecommerceproject.admin.report.response.OrderReportResponse;
@@ -12,6 +13,7 @@ import com.vendavaultecommerceproject.entities.sale.SaleEntity;
 import com.vendavaultecommerceproject.entities.seller.SellerEntity;
 import com.vendavaultecommerceproject.entities.user.UserEntity;
 import com.vendavaultecommerceproject.entities.video.VideoEntity;
+import com.vendavaultecommerceproject.exception.exeception.DataNotAcceptableException;
 import com.vendavaultecommerceproject.model.sales.SaleModel;
 import com.vendavaultecommerceproject.model.seller.SellerModel;
 import com.vendavaultecommerceproject.model.user.Usermodel;
@@ -57,7 +59,8 @@ public class SystemReportServiceImpl implements SystemReportService{
         return new OrderServerReportResponse(
                 baseUrl+request.getRequestURI(),"OK",
                 new OrderReportResponse(200,"Monthly Sale report",returnMonthAsString(),
-                        getMonthlySale().size(),returnTotalProfitForTheMonth(),returnTotalRegisteredCustomersForTheMonth(),getMonthlySale()));
+                        getMonthlySale().size(),returnTotalProfitForTheMonth(),
+                        returnTotalRegisteredCustomersForTheMonth(),getMonthlySale()));
     }
     @Override
     public OrderServerReportResponse getOrderBasedOnId(HttpServletRequest request, Long orderId) {
@@ -68,21 +71,25 @@ public class SystemReportServiceImpl implements SystemReportService{
         }
         return new OrderServerReportResponse(
                 baseUrl+request.getRequestURI(),"OK",
-                new OrderReportResponse(200,"Order report","Order Id not found",0,0,0,getOrderBasedOnId(orderId)));
+                new OrderReportResponse(200,"Order report","Order with Id "+orderId,0,0,0,getOrderBasedOnId(orderId)));
     }
 
     @Override
-    public OrderServerReportResponse getOtherReportBasedOnSelectedMonth(HttpServletRequest request, String pickedMonth) {
-        DateTimeFormatter formatter
-                = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-        LocalDate localDate
-                = LocalDate.parse(pickedMonth, formatter);
-
-        LocalDate month = LocalDate.from(localDate.getMonth());
-        LocalDate year = LocalDate.ofEpochDay(localDate.getYear());
-
-        return null;
+    public OrderServerReportResponse getOtherReportBasedOnSelectedMonth(HttpServletRequest request, MonthlyReportDto monthlyReportDto) throws DataNotAcceptableException {
+        int year = monthlyReportDto.getYear();
+        int month = monthlyReportDto.getMonth();
+        if (Objects.isNull(year)){
+            throw new DataNotAcceptableException("Please Enter a year");
+        }
+        if (Objects.isNull(month)){
+            throw new DataNotAcceptableException("Please Enter a month");
+        }
+        return new OrderServerReportResponse(
+                baseUrl+request.getRequestURI(),"OK",
+                new OrderReportResponse(200,"Past Month Report",returnSelectedMonthAsString(year, month),
+                        getPreviousMonthSale(year, month).size(),returnTotalProfitForTheMonthAndYearSelected(year,month)
+                        ,returnTotalRegisteredCustomersForTheMonthAndYearSelected(year,month),
+                        getPreviousMonthSale(year,month)));
     }
     @Override
     public List<SellerModel> getRegisteredSellerForTheMonth(HttpServletRequest request) {
@@ -95,7 +102,6 @@ public class SystemReportServiceImpl implements SystemReportService{
         }
         return sellerModels;
     }
-
     @Override
     public List<Usermodel> getRegisteredUsersForTheMonth(HttpServletRequest request) {
         LocalDate start = YearMonth.now().atDay(1);
@@ -127,6 +133,23 @@ public class SystemReportServiceImpl implements SystemReportService{
         return totalProfit;
     }
 
+    private double returnTotalProfitForTheMonthAndYearSelected(int year,int month){
+        double totalVideoUpload = 0;
+        double totalProductUpload = 0;
+        double totalProfit = 0;
+
+        List<ProductEntity> productEntities =
+                productRepository.findProductByMonthAndYearUploaded(year,month);
+        totalProductUpload = productEntities.size();
+
+        List<VideoEntity> videoEntities = videoRepository.findVideoByMonthAndYearUploaded(year,month);
+        totalVideoUpload = videoEntities.size();
+
+        totalProfit = ((totalProductUpload + totalVideoUpload)*1000);
+
+        return totalProfit;
+    }
+
     private double returnTotalRegisteredCustomersForTheMonth(){
         double newRegisteredSellers = 0;
         double newRegisteredBuyers = 0;
@@ -148,26 +171,24 @@ public class SystemReportServiceImpl implements SystemReportService{
 
     }
 
-    private List<OrderReportModel> getPastMonthOrder(LocalDate start,LocalDate end){
-        List<SaleEntity> saleEntities =
-                saleRepository.findByDatePurchasedBetween(start,end);
-        //Assign the retrieved sales to orderModel
-        List<OrderReportModel> orderReportModels = new ArrayList<>();
-        for (SaleEntity sale: saleEntities){
-            List<CartItemEntity> cartItemEntityList = sale.getCartItemList().stream().toList();
-            for (CartItemEntity cartItemEntity : cartItemEntityList){
-                OrderReportModel orderReportModel = OrderReportModel.builder()
-                        .orderId(sale.getId())
-                        .productName(cartItemEntity.getProduct().getProductName())
-                        .price(cartItemEntity.getProduct().getPrice().intValue())
-                        .date(sale.getDatePurchased().toString())
-                        .vendor(cartItemEntity.getProduct().getProductOwner().getName())
-                        .productImage(cartItemEntity.getProduct().getProductImages().stream().toList().toString())
-                        .build();
-                orderReportModels.add(orderReportModel);
-            }
-        }
-        return orderReportModels;
+    private double returnTotalRegisteredCustomersForTheMonthAndYearSelected(int year,int month){
+        double newRegisteredSellers = 0;
+        double newRegisteredBuyers = 0;
+        double totalNewCustomers = 0;
+
+
+        List<UserEntity> userEntities =
+                userRepository.findUsersByMonthAndYearCreated(year,month);
+        newRegisteredBuyers = userEntities.size();
+
+        List<SellerEntity> sellerEntities =
+                sellerRepository.findSellersByMonthAndYearCreated(year,month);
+        newRegisteredSellers = sellerEntities.size();
+
+        totalNewCustomers = newRegisteredBuyers + newRegisteredSellers;
+
+        return totalNewCustomers;
+
     }
 
 
@@ -196,6 +217,30 @@ public class SystemReportServiceImpl implements SystemReportService{
         return orderReportModels;
     }
 
+    private List<OrderReportModel> getPreviousMonthSale(int year,int month){
+        //Only retrieved sales made in that particular month and year selected
+        List<SaleEntity> saleEntities =
+                saleRepository.findSalesByMonthAndYear(year,month);
+        //Assign the retrieved sales to orderModel
+        List<OrderReportModel> orderReportModels = new ArrayList<>();
+        for (SaleEntity sale: saleEntities){
+            List<CartItemEntity> cartItemEntityList = sale.getCartItemList().stream().toList();
+            for (CartItemEntity cartItemEntity : cartItemEntityList){
+                OrderReportModel orderReportModel = OrderReportModel.builder()
+                        .orderId(sale.getId())
+                        .productName(cartItemEntity.getProduct().getProductName())
+                        .price(cartItemEntity.getProduct().getPrice().intValue())
+                        .date(sale.getDatePurchased().toString())
+                        .vendor(cartItemEntity.getProduct().getProductOwner().getName())
+                        .productImage(cartItemEntity.getProduct().getProductImages().stream().toList().toString())
+                        .build();
+                orderReportModels.add(orderReportModel);
+            }
+        }
+        return orderReportModels;
+    }
+
+
     private List<OrderReportModel> getOrderBasedOnId(Long orderId){
         SaleEntity sale = saleRepository.findById(orderId).get();
         List<OrderReportModel> orderReportModels = new ArrayList<>();
@@ -213,6 +258,7 @@ public class SystemReportServiceImpl implements SystemReportService{
         }
         return orderReportModels;
     }
+
     private String returnMonthAsString(){
         LocalDate givenDate = LocalDate.now();
         // Create a DateTimeFormatter object to format LocalDate
@@ -225,6 +271,21 @@ public class SystemReportServiceImpl implements SystemReportService{
         LocalDate localDate = LocalDate.parse(givenDate.format(formatter));
         System.out.println("The formatted date is "+localDate);
         String fullString = "The report for the month of "+dateToString+" generated on "+dayToString;
+
+        // Return the result
+        return (fullString);
+    }
+    private String returnSelectedMonthAsString(int year,int month){
+        LocalDate selectedDate = LocalDate.of(year,month,1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM-yyyy");
+        DateTimeFormatter formatterWithDay = DateTimeFormatter.ofPattern("dd-MMMM-yyyy");
+
+        // Use the format() method to convert LocalDate to string
+        String dateToString = selectedDate.format(formatter);
+        String dayToString = selectedDate.format(formatterWithDay);
+        //LocalDate localDate = LocalDate.parse(selectedDate.format(formatter));
+        //System.out.println("The formatted date is "+localDate);
+        String fullString = "The report for the month of "+dateToString;
 
         // Return the result
         return (fullString);

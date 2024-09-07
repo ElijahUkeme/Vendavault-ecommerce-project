@@ -184,7 +184,12 @@ public class ProductServiceImpl implements ProductService {
             }
         }
         return new ProductPageResponse(
-                productModels, pageNumber, pageSize, productPage.getTotalPages(), (int) productPage.getTotalElements(), productPage.isLast()
+                productModels,
+                pageNumber,
+                pageSize,
+                productPage.getTotalPages(),
+                (int) productPage.getTotalElements(),
+                productPage.isLast()
         );
     }
 
@@ -205,7 +210,9 @@ public class ProductServiceImpl implements ProductService {
             }
         }
         return new ProductPageResponse(
-                productModels, pageNumber, pageSize, productPage.getTotalPages(), (int) productPage.getTotalElements(), productPage.isLast()
+                productModels, pageNumber,
+                pageSize, productPage.getTotalPages(),
+                (int) productPage.getTotalElements(), productPage.isLast()
         );
     }
 
@@ -289,7 +296,6 @@ public class ProductServiceImpl implements ProductService {
         Page<ProductEntity> productEntities = productRepository.getAllProductForTheSellerWithPagination(seller,pageable);
         List<ProductModel> approvedProduct = new ArrayList<>();
         for (ProductEntity product: productEntities){
-
                 approvedProduct.add(ProductModelUtil.getReturnedProductModel(product));
 
         }
@@ -378,7 +384,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public List<ProductModel> allProductsForTheSeller(SellerEntity seller){
-        List<ProductEntity> productEntityList = productRepository.getAllProductForSeller(seller);
+        List<ProductEntity> productEntityList = productRepository.findByProductOwner(seller);
         List<ProductModel> productModelList = new ArrayList<>();
         for (ProductEntity product: productEntityList){
             productModelList.add(ProductModelUtil.getReturnedProductModel(product));

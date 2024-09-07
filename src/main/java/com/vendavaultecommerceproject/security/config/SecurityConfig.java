@@ -38,7 +38,6 @@ public class SecurityConfig {
                                         "/swagger-resources",
                                         "/swagger-resources/**",
                                         "/ws/**",
-                                        "/admin/monthly-sale-report",
                                         "/configuration/ui",
                                         "/configuration/security",
                                         "/","/static/**", "index*", "/css/*", "/js/*",
@@ -52,8 +51,9 @@ public class SecurityConfig {
                                         "/confirm-account",
                                         "/download/{attachmentId}",
                                         "/return/{attachmentId}",
+                                        "/api/bookings/**",
                                         "/retrieved/{productImageId}",
-                                        "/verify-account")
+                                        "/activate-account")
                                 .permitAll()
                                 .requestMatchers("/video/**").hasAuthority("MANAGER")
                                 .requestMatchers("/user/**").hasAuthority("MANAGER")
